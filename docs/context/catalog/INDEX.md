@@ -27,6 +27,24 @@
 
 **BATCH-01 (5개) — ASTRA 통과(치명 0건), 사람 테스트 대기.** 리뷰: [1차](../reviews/2026-09-29-ASTRA-BATCH-01.md), [2차](../reviews/2026-09-29-ASTRA-BATCH-01-r2.md). 현재 버전: WORD 0.5, BAN 0.5, KKT 0.4, WHO 0.4, NUNCHI 0.3. 비치명 지적은 [구현 백로그](IMPLEMENTATION-BACKLOG.md). 공통 판정은 [09-ENGINE-RULES](../09-ENGINE-RULES.md). 인원·시간은 검증 전 가설, FABLE·사람 리뷰 기록 없음.
 
+## BATCH-02 후보 (2026-09-30, ASTRA 통과 — 구현할 것 고르기 전)
+모두 AI 없음·[기본값·가설] 초안(v0.1). 리뷰: [A — 순발력·말장난](../reviews/2026-09-30-ASTRA-BATCH-02-A.md), [B — 눈치·블러핑](../reviews/2026-09-30-ASTRA-BATCH-02-B.md). 인원·시간은 검증 전 가설.
+
+| ID / 게임 | mode | relationship | length | ai_intervention | min | recommended | max | 상태 / 구현 |
+|---|---|---|---|---|---:|---|---:|---|
+| [CSBOMB / 초성 폭탄](games/CSBOMB.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
+| [GATE / 말 검문소](games/GATE.md) | individual | both | short | none | 3 | [3,4,5,6,7,8] | 8 | astra_passed / not_started |
+| [CLAP / 369 짝!](games/CLAP.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
+| [RAIN / 단어 소나기](games/RAIN.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
+| [REV / 거꾸로 타자](games/REV.md) | individual | both | short | none | 3 | [3,4,5,6,7,8] | 8 | astra_passed / not_started |
+| [TOWER / 글자 탑](games/TOWER.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
+| [MINOR / 소수결](games/MINOR.md) | individual | both | short | none | 3 | [4,5,6,7] | 8 | astra_passed / not_started |
+| [GREED / 독식](games/GREED.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
+| [TRUTH / 진실 혹은 뻥](games/TRUTH.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
+| [POP / 풍선](games/POP.md) | individual | both | short | none | 3 | [3,4,5,6,7,8] | 8 | astra_passed / not_started |
+| [CALL / 뻥이야](games/CALL.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
+| [DEFUSE / 폭탄 해체반](games/DEFUSE.md) | asymmetric_team | both | short | none | 3 | [4,5,6] | 8 | astra_passed / not_started |
+
 ## 보류 후보
 분류와 인원은 원대화 제안 또는 이번 이식용 가설이다. 특히 3명 성립 여부는 미검증이다.
 
@@ -81,3 +99,4 @@ SD 관계·길이·인원은 원대화 카탈로그·인원 예시에 근거하�
 | 2026-09-30 | KKT 사전 보강 | 표준국어대사전 + 우리말샘(2026-06 빌드), 96,217 → 197,543단어 (DEC-19) |
 | 2026-09-30 | WORD·BAN 0.4→0.5 | 단어 말하기 90초×3라운드·득점 간격 10초, 금지어 120초×2라운드, [현재 순위] 표 (DEC-20) |
 | 2026-09-30 | 콘텐츠 확장 | 단어 풀 380→796개(`pools-2`, 상표명 제외), 사회자 대사 40→127개, 포브스 질문 22→166개(덱 `2026-09-30`). 규칙 변경 없음 |
+| 2026-09-30 | BATCH-02 12개 신규 | 순발력·말장난 6(CSBOMB, GATE, CLAP, RAIN, REV, TOWER) + 눈치·블러핑 6(MINOR, GREED, TRUTH, POP, CALL, DEFUSE) 스펙 초안, ASTRA 치명 0건 |

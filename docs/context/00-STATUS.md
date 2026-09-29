@@ -17,7 +17,7 @@ Project Backstage는 **사람들이 함께 놀고 웃는 채팅 기반 소셜 �
 | 실제 repo / 코드 / 배포 | GitHub `PARK-TAEGEON/project-backstage`. 프로토타입 기초 공사 완료(DEC-14): 방·로비·방장 설정·매치·순위 합산·채팅·재접속·관찰 데이터. 구현 게임 5개(BATCH-01 전부): 눈치게임·포브스·쿵쿵따(DEC-16)·단어 말하기·금지어(DEC-18, AI 없이). 배포 없음(로컬 실행) |
 | 기술 스택 | Node.js 22 + Socket.IO 서버, React 19 + Vite 웹, TypeScript, Vitest (DEC-14). 구조는 docs/ARCHITECTURE.md |
 | 출시 게임 수 / 첫 배치 | BATCH-01 = WORD(단어 말하기), BAN(금지어), KKT(쿵쿵따), WHO(포브스), NUNCHI(눈치게임) — 5개 구성 완료, 리뷰 대기; 출시 게임 수는 미정 |
-| 카탈로그 후보 | candidate 5개(WORD·BAN·KKT·WHO·NUNCHI), hold 2개(SD·EK), rejected 2개(HR, WHO 0.1 안) |
+| 카탈로그 후보 | BATCH-01 5개(구현 완료), BATCH-02 12개(astra_passed, 구현 대기), hold 2개(SD·EK), rejected 2개(HR, WHO 0.1 안) |
 | ASTRA / FABLE 실행 연동 | ASTRA는 Claude 서브에이전트로 치명 문제만 확인 (DEC-13). BATCH-01 5개 모두 astra_passed. FABLE 선택 |
 | 사람 플레이테스트 | 확인된 기록 없음 — BATCH-01 5개 대기. 5개 모두 프로토타입으로 바로 테스트 가능 |
 | 자동 검증 | 단위 테스트 83개(서버 판정·방·매치·쿵쿵따 사전·단어 게임·그룹 채팅), 브라우저 스모크 2종 — 4명 눈치게임→포브스→쿵쿵따, 3명 단어 말하기→금지어(라운드 단축) — 통과 — 2026-09-29 |
