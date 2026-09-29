@@ -12,8 +12,8 @@
 | [WORD / 단어 말하기](games/WORD.md) | individual | both | medium | low | 3 | [4,5,6] | 8 | astra_passed / not_started |
 | [BAN / 금지어](games/BAN.md) | individual | both | short | low | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
 | [KKT / 쿵쿵따](games/KKT.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
-| [NUNCHI / 눈치게임](games/NUNCHI.md) | individual | both | short | none | 3 | [4,5,6,7,8] | 8 | astra_passed / not_started |
-| [WHO / 포브스](games/WHO.md) | individual | friends | short | none | 3 | [4,5,6,7,8] | 8 | astra_passed / not_started |
+| [NUNCHI / 눈치게임](games/NUNCHI.md) | individual | both | short | none | 3 | [4,5,6,7,8] | 8 | astra_passed / prototype |
+| [WHO / 포브스](games/WHO.md) | individual | friends | short | none | 3 | [4,5,6,7,8] | 8 | astra_passed / prototype |
 
 **WORD — 단어 말하기**(DEC-02, 첫 구현 게임). 비밀 단어를 채팅에 끼워 넣어 득점하고, 다른 사람의 단어를 맞히는 챌린지(+3/−3)로 견제한다. 개인전, 라운드제 — 라운드별 집계 후 합계로 최종 순위. 단어는 2음절 이상·띄어쓰기 없는 한 단어. 상세 룰은 [스펙](games/WORD.md)이 원본이다.
 
@@ -63,6 +63,7 @@ SD 관계·길이·인원은 원대화 카탈로그·인원 예시에 근거하�
 | 2026-09-29 | 초기 이식 | 핵심 후보 2개만 보류로 보존; 저품질 대량 목록과 가짜 승인 상태를 만들지 않음 |
 | 2026-09-29 | SD 0.0→0.1-context | `ai_intervention` high→none, 사전 선정 단어 덱 방식으로 변경 (DEC-01). 검수 기록이 없어 재검수 대상 없음 |
 | 2026-09-29 | WORD 0.1 신규 | SD의 단어 미션 방향을 ‘단어 말하기’로 분리, 첫 구현 게임으로 candidate 등록 (DEC-02) |
+| 2026-09-29 | NUNCHI·WHO 프로토타입 | 기초 공사와 함께 구현 (DEC-14) |
 | 2026-09-29 | BATCH-01 ASTRA 통과 | QA 절차 간소화(DEC-13) 후 치명 문제만 2차 확인 → 5개 모두 astra_passed (WORD는 W-6 수정 후) |
 | 2026-09-29 | BATCH-01 ASTRA 1차 반영 | 5개 모두 hold → 지적 반영, 버전 상향, 공통 판정 규약(09) 신설 (DEC-12, proposed) |
 | 2026-09-29 | NUNCHI 0.1 신규 | 눈치게임 candidate 등록, BATCH-01 5개 완성 (DEC-09) |

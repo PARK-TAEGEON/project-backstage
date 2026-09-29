@@ -1,0 +1,14 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './theme/tokens.css';
+import './theme/base.css';
+import { RoomProvider } from './state/RoomProvider';
+import { App } from './App';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <RoomProvider>
+      <App />
+    </RoomProvider>
+  </StrictMode>,
+);

@@ -1,0 +1,74 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.stepValue {
+  min-width: 36px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  color: var(--c-marquee);
+}
+.games {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.game {
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
+  background: var(--c-bg-deep);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  opacity: 0.7;
+}
+.gameOn {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--c-marquee) 60%, var(--c-line));
+}
+.gameHead {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  cursor: pointer;
+}
+.gameHead input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--c-marquee);
+}
+.gameName {
+  font-weight: 900;
+  font-size: var(--fs-lg);
+}
+.opts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding-top: var(--sp-2);
+  border-top: 1px dashed var(--c-line);
+}
+.opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}

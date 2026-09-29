@@ -1,0 +1,65 @@
+/*
+ * 디자인 토큰 — 색·글꼴·간격·모서리·그림자를 모두 여기서 바꾼다 (사용자 요청 4번).
+ * 컴포넌트는 이 변수만 쓰고 색 값을 직접 쓰지 않는다.
+ * 콘셉트: 예능 무대 뒤(Backstage) — 어두운 무대 + 전광판 노랑 + 네온 포인트.
+ */
+:root {
+  /* 색 */
+  --c-bg: #16131f;
+  --c-bg-deep: #0e0c15;
+  --c-surface: #221d30;
+  --c-surface-2: #2d263f;
+  --c-line: #3b3252;
+  --c-text: #f6f2ff;
+  --c-text-dim: #b3a9cc;
+  --c-text-faint: #7d7396;
+  --c-marquee: #ffce3d; /* 전광판 */
+  --c-marquee-ink: #1a1405;
+  --c-accent: #ff4f8b; /* 주요 버튼 */
+  --c-accent-ink: #ffffff;
+  --c-accent-2: #6ae3ff; /* 보조 강조 */
+  --c-good: #3ddc97;
+  --c-bad: #ff5a5f;
+  --c-warn: #ffb547;
+  --c-bulb-off: #4a3f22;
+
+  /* 글꼴 */
+  --font-display: 'Black Han Sans', 'Noto Sans KR', system-ui, sans-serif;
+  --font-body: 'Noto Sans KR', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* 크기 */
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 20px;
+  --fs-xl: 28px;
+  --fs-2xl: 40px;
+  --fs-hero: clamp(44px, 12vw, 96px);
+
+  /* 간격 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* 모양 */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-pop: 0 6px 0 rgba(0, 0, 0, 0.35);
+
+  /* 움직임 */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur-med: 240ms;
+
+  /* 레이아웃 */
+  --content-max: 1080px;
+  --gutter: 16px;
+}

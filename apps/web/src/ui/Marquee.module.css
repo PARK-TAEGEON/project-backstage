@@ -1,0 +1,99 @@
+.board {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--c-marquee);
+  color: var(--c-marquee-ink);
+  padding: 18px;
+  box-shadow: 0 0 0 6px var(--c-bg-deep), 0 0 60px color-mix(in srgb, var(--c-marquee) 35%, transparent);
+}
+.bulbs {
+  position: absolute;
+  inset: 6px;
+  border-radius: calc(var(--radius-lg) - 4px);
+  pointer-events: none;
+  background:
+    radial-gradient(circle, #fff7d1 0 3px, transparent 4px) 0 0 / 18px 18px repeat-x,
+    radial-gradient(circle, #fff7d1 0 3px, transparent 4px) 0 100% / 18px 18px repeat-x,
+    radial-gradient(circle, #fff7d1 0 3px, transparent 4px) 0 0 / 18px 18px repeat-y,
+    radial-gradient(circle, #fff7d1 0 3px, transparent 4px) 100% 0 / 18px 18px repeat-y;
+  animation: blink 1.2s steps(2) infinite;
+  opacity: 0.9;
+}
+@keyframes blink {
+  50% {
+    opacity: 0.45;
+  }
+}
+.inner {
+  position: relative;
+  background: var(--c-bg-deep);
+  color: var(--c-text);
+  border-radius: var(--radius-md);
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.kicker {
+  font-family: var(--font-display);
+  letter-spacing: 0.3em;
+  font-size: var(--fs-sm);
+  color: var(--c-marquee);
+}
+.title {
+  font-size: var(--fs-hero);
+  color: var(--c-marquee);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--c-marquee) 55%, transparent);
+  word-break: keep-all;
+}
+.md .title {
+  font-size: clamp(28px, 7vw, 52px);
+}
+.subtitle {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--c-text);
+  word-break: keep-all;
+}
+.countdown {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--c-bg-deep) 70%, transparent);
+  z-index: 50;
+  pointer-events: none;
+}
+.count {
+  font-size: min(48vw, 320px);
+  color: var(--c-marquee);
+  text-shadow: 0 0 60px color-mix(in srgb, var(--c-marquee) 60%, transparent);
+  line-height: 1;
+}
+.timer {
+  position: relative;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: var(--c-bg-deep);
+  border: 1px solid var(--c-line);
+  overflow: hidden;
+}
+.timerFill {
+  height: 100%;
+  background: var(--c-accent-2);
+  transition: width 100ms linear;
+}
+.urgent {
+  background: var(--c-bad);
+}
+.timerText {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}

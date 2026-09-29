@@ -12,6 +12,13 @@
 | recommended_players | 권장 인원 목록, 예: [4,5,6] | 재미와 흐름이 적합하다고 예상/검증된 인원 |
 | max_players | min_players 이상 정수 | 지원하는 최대 인원 |
 
+코드에서는 위 필드에 더해 다음 두 가지를 `GameMeta`(packages/shared/src/game.ts)에 둔다 (DEC-14).
+
+| 필드 | 허용 값 | 의미 |
+|---|---|---|
+| inputs | chat / vote / text / avatar 중 여러 개 | 플레이 입력 방식. avatar는 추후 움직이는 아바타 게임용 |
+| platforms | web / roblox | 실행 플랫폼. **`ai: none`인 게임만 Roblox 후보** (`isRobloxCandidate`) |
+
 운영 규약: 개인전과 팀전이 모두 가능한 게임은 방식별로 **별도 항목**(예: `XXX-solo`, `XXX-team`)으로 등록하고 각각 분류·검수한다. 한 경기 안에서 라운드마다 방식을 바꾸지 않는다. 권장 목록은 비어 있지 않고 모든 값이 최소~최대 범위 안에 있어야 한다. 짝수 전용 등은 `player_constraints`로 추가한다. **3명 허용은 제품 방향이며 게임별 min을 억지로 3으로 낮추라는 뜻이 아니다.** 최대 8명은 원대화의 초기 범위 제안이고 영구 상한은 미정이다.
 
 ## 분류 해석

@@ -1,0 +1,28 @@
+{
+  "name": "project-backstage",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c blue,magenta \"npm run dev -w @backstage/server\" \"npm run dev -w @backstage/web\"",
+    "build": "npm run build -w @backstage/web",
+    "start": "npm run start -w @backstage/server",
+    "typecheck": "tsc -p packages/shared && tsc -p apps/server && tsc -p apps/web",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test",
+    "e2e": "node scripts/e2e-smoke.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.0",
+    "concurrently": "^10.0.0",
+    "@playwright/test": "1.56.0"
+  }
+}

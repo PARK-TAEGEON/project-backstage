@@ -7,7 +7,7 @@
 ## 식별 / 분류
 - id / name / version / batch_id: WHO / 포브스 / 0.4 / BATCH-01
 - status: astra_passed
-- implementation_status: not_started
+- implementation_status: prototype — `apps/server/src/games/forbes/` (DEC-14)
 - platform / owner / updated_at: web / 사용자 / 2026-09-29
 - mode: individual (개인전)
 - relationship: friends — 서로를 알아야 지목에 의미가 있다

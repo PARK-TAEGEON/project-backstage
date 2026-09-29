@@ -5,7 +5,7 @@
 ## 식별 / 분류
 - id / name / version / batch_id: NUNCHI / 눈치게임 / 0.2 / BATCH-01
 - status: astra_passed
-- implementation_status: not_started
+- implementation_status: prototype — `apps/server/src/games/nunchi/` (DEC-14)
 - platform / owner / updated_at: web / 사용자 / 2026-09-29
 - mode: individual (개인전)
 - relationship: both

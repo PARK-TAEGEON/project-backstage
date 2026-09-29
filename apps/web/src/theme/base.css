@@ -1,0 +1,242 @@
+/* 공통 요소 스타일. 값은 모두 tokens.css의 변수를 쓴다. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+body {
+  background: radial-gradient(1200px 600px at 50% -200px, #2a2140 0%, var(--c-bg) 60%) fixed, var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.2;
+}
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+.dim {
+  color: var(--c-text-dim);
+}
+.faint {
+  color: var(--c-text-faint);
+}
+.page {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--sp-4) var(--gutter) var(--sp-7);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.spacer {
+  flex: 1;
+}
+
+/* 카드 */
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4);
+  box-shadow: var(--shadow-card);
+}
+.card-title {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--c-text-dim);
+  margin-bottom: var(--sp-3);
+  letter-spacing: 0.04em;
+}
+
+/* 버튼 */
+.btn {
+  appearance: none;
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: var(--fs-md);
+  cursor: pointer;
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  box-shadow: var(--shadow-pop);
+  transition: transform var(--dur-fast) ease, filter var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+  min-height: 48px;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn:focus-visible,
+.input:focus-visible,
+.chip:focus-visible {
+  outline: 3px solid var(--c-accent-2);
+  outline-offset: 2px;
+}
+.btn-primary {
+  background: var(--c-accent);
+  color: var(--c-accent-ink);
+}
+.btn-marquee {
+  background: var(--c-marquee);
+  color: var(--c-marquee-ink);
+}
+.btn-ghost {
+  background: transparent;
+  box-shadow: none;
+  border: 1px solid var(--c-line);
+}
+.btn-block {
+  width: 100%;
+}
+.btn-sm {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: var(--fs-sm);
+  box-shadow: none;
+}
+
+/* 입력 */
+.input {
+  width: 100%;
+  background: var(--c-bg-deep);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  min-height: 48px;
+  outline: none;
+}
+.input::placeholder {
+  color: var(--c-text-faint);
+}
+.label {
+  font-size: var(--fs-sm);
+  color: var(--c-text-dim);
+  font-weight: 500;
+}
+
+/* 칩(선택 버튼) */
+.chip {
+  border: 1px solid var(--c-line);
+  background: var(--c-bg-deep);
+  border-radius: var(--radius-pill);
+  padding: 6px 12px;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  min-height: 36px;
+}
+.chip[aria-pressed='true'] {
+  background: var(--c-marquee);
+  color: var(--c-marquee-ink);
+  border-color: var(--c-marquee);
+  font-weight: 700;
+}
+.chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  background: var(--c-surface-2);
+  color: var(--c-text-dim);
+}
+.badge-host {
+  background: var(--c-marquee);
+  color: var(--c-marquee-ink);
+}
+.badge-good {
+  background: color-mix(in srgb, var(--c-good) 20%, transparent);
+  color: var(--c-good);
+}
+.badge-bad {
+  background: color-mix(in srgb, var(--c-bad) 20%, transparent);
+  color: var(--c-bad);
+}
+
+@keyframes pop-in {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes rise {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.pop-in {
+  animation: pop-in var(--dur-med) var(--ease-pop) both;
+}
+.rise {
+  animation: rise var(--dur-med) ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
