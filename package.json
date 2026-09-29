@@ -14,7 +14,8 @@
     "typecheck": "tsc -p packages/shared && tsc -p apps/server && tsc -p apps/web",
     "test": "vitest run",
     "check": "npm run typecheck && npm run test",
-    "e2e": "node scripts/e2e-smoke.mjs"
+    "e2e": "node scripts/e2e-smoke.mjs",
+    "e2e:words": "node scripts/e2e-words.mjs"
   },
   "engines": {
     "node": ">=22"

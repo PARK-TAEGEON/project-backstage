@@ -7,8 +7,10 @@ import type { ServerGame } from './types.js';
 import { nunchi } from './nunchi/index.js';
 import { forbes } from './forbes/index.js';
 import { kkt } from './kkt/index.js';
+import { word } from './word/index.js';
+import { ban } from './ban/index.js';
 
-export const GAMES: ServerGame[] = [nunchi, forbes, kkt];
+export const GAMES: ServerGame[] = [nunchi, forbes, kkt, word, ban];
 
 export const GAME_METAS: GameMeta[] = GAMES.map((g) => g.meta);
 

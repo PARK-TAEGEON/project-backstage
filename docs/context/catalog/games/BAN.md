@@ -6,12 +6,12 @@
 - id / name / version / batch_id: BAN / 금지어 / 0.4 / BATCH-01 (WORD와 엔진 공유)
 - 계보: WORD(단어 말하기)의 거울판 — WORD는 자기 단어를 말해야 하고, BAN은 자기 단어를 말하면 안 된다.
 - status: astra_passed
-- implementation_status: not_started
+- implementation_status: prototype (서버 `apps/server/src/games/ban/`, 웹 `apps/web/src/games/ban/`, 2026-09-30)
 - platform / owner / updated_at: web / 사용자 / 2026-09-29
 - mode: individual (개인전) [확정]
 - relationship: both [가설; 두 집단 각각 검증 필요]
 - length: short — 2라운드 × 5분 + 집계·재편성 [가설; OPEN-02 경계 미정]
-- ai_intervention: low — 금지어 제공, 침묵 시 물꼬 트기
+- ai_intervention: none (프로토타입, DEC-18) — 금지어·사회자 문장 모두 미리 고른 목록 (WORD와 같은 풀)
 - min_players: 3
 - recommended_players: [3, 4, 5, 6] [확정: 한 그룹 적정 인원 3~6명]
 - max_players: 8
@@ -111,6 +111,14 @@
 ## 미정 항목
 - 입 닫기 전략 대응 (최소 발언 수 등)
 
+## 구현 메모 (프로토타입, DEC-18) [기본값·가설]
+- **AI 없음:** WORD와 같은 단어 풀·사회자 문장. 그룹마다 따로 배정(그룹 안 중복 없음, 풀 3은 그룹당 0~1개).
+- 흐름: 소개 5초(같은 조 사람들의 금지어 보여 줌, 내 것은 ❓❓❓) → 진행 5분 → 공개 10초 → 재편성.
+- **그룹 채팅:** 소개·진행 중 채팅과 게임 알림은 같은 조에게만 보인다 (방 채팅의 `audience`). 재접속 때 받는 채팅 기록도 같은 조 것만.
+- 재편성: 30번 섞어 지난 라운드와 같은 조였던 쌍이 가장 적은 편성을 고른다.
+- 적발 알림은 걸린 메시지가 채팅에 올라간 직후 나온다. 적발된 사람 화면에 챌린지 상자(남은 시간 막대, 추측 입력, “안 할래요”).
+- 소개 중 이탈로 조가 3명 미만이 되면 그 조는 시작하지 않고 대기(사회자 없음).
+
 ## 판정·처리 규약 (ASTRA 1차 반영) [기본값·가설]
 [공통 판정 규약](../../09-ENGINE-RULES.md)을 따른다. BAN 고유 사항:
 - **참가자 상태 (B-3):** `일반 → 챌린지 대기(최대 10초) → 입막힘(10초) 또는 판정 해제 → 일반`.
@@ -126,10 +134,11 @@
 - **재접속:** 같은 라운드에 돌아오면 그룹·점수·입막힘·챌린지 남은 기한을 복원. 라운드 종료를 되돌리지 않는다.
 
 ## 검수 / 변경
-- ASTRA: [ASTRA 1차](../../reviews/2026-09-29-ASTRA-BATCH-01.md) — 0.3 hold → 0.4에서 지적 반영, [ASTRA 2차](../../reviews/2026-09-29-ASTRA-BATCH-01-r2.md) — v0.4 **치명 0건, pass** / FABLE: 없음 / Human: 없음
-- next_action: WORD와 함께 ASTRA 검토
+- ASTRA: [ASTRA 1차](../../reviews/2026-09-29-ASTRA-BATCH-01.md) — 0.3 hold → 0.4에서 지적 반영, [ASTRA 2차](../../reviews/2026-09-29-ASTRA-BATCH-01-r2.md) — v0.4 **치명 0건, pass**, [구현 확인](../../reviews/2026-09-30-ASTRA-WORD-BAN-impl.md) — 치명 1건 수정 후 pass / FABLE: 없음 / Human: 없음
+- next_action: 사람 테스트 — 입 닫기 전략이 나오는지, 1번 풀 금지어의 가혹함, 7·8명 그룹 분할 체감
 - changelog:
   - 2026-09-29 / 0.1 / 최초 작성 (DEC-04)
   - 2026-09-29 / 0.1→0.2 / 점수: 나머지 전원 +1, 말한 사람 입막힘 벌칙 (DEC-04 보충). 검수 기록 없음
   - 2026-09-29 / 0.2→0.3 / 걸린 순간 챌린지(성공 +3 / 실패 −3) 추가 (DEC-04 보충). 검수 기록 없음
   - 2026-09-29 / 0.3→0.4 / ASTRA 1차 지적 반영: 사회자에 금지어 미전달, 챌린지 기한과 종료 순서, 참가자 상태 전이, 도배 간격 미적용, 전체 종료 후 재편성, 비밀 정보 전달 권한 (DEC-12, proposed). 재검수 범위: ASTRA 전체
+  - 2026-09-30 / 0.4 (구현) / AI 없이 프로토타입 구현, 그룹 채팅, “구현 메모” 추가, ai_intervention low→none (DEC-18). 규칙 변경 없음

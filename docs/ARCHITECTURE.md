@@ -18,6 +18,9 @@ apps/server/            실시간 서버 (Node + Socket.IO, 모든 판정은 서
   src/games/nunchi/     눈치게임
   src/games/forbes/     포브스
   src/games/kkt/        쿵쿵따 (두음법칙 표 hangul.ts, 사전 로더 dictionary.ts)
+  src/games/word/       단어 말하기
+  src/games/ban/        금지어 (그룹 편성·그룹 채팅)
+  src/games/wordcore/   두 단어 게임 공용: 단어 풀(pools.ts), 배정·포함 판정·사회자(core.ts)
   dict/                 쿵쿵따 사전 데이터 (표준국어대사전 세 글자, CC BY-SA — README 참고)
   src/analytics.ts      이벤트 저장(JSONL)과 통계 계산
   test/                 단위 테스트 (가짜 시계로 시간 판정 검증)
@@ -30,6 +33,7 @@ apps/web/               웹 화면 (React + Vite)
   src/games/            게임별 화면 + 등록부
 scripts/e2e-smoke.mjs   브라우저 4개로 한 매치(눈치게임→포브스→쿵쿵따)를 끝까지 돌리는 스모크 테스트
 scripts/build-kkt-dict.py  표준국어대사전 XML → 쿵쿵따 사전 파일
+scripts/e2e-words.mjs   브라우저 3개로 단어 말하기→금지어를 끝까지 (라운드 단축)
 ```
 
 ## 실행
@@ -45,6 +49,7 @@ npm run build && npm start   # 배포 모드: 서버가 빌드된 웹까지 제�
 - 관리자 관찰 화면: `/admin`. `ADMIN_TOKEN` 환경 변수를 설정하면 토큰을 입력해야 볼 수 있다 (배포 시 필수).
 - 관찰 데이터는 `data/events.jsonl`에 쌓인다 (`DATA_DIR`로 변경).
 - 스모크 테스트: 서버를 `PORT=3999`로 띄운 뒤 `BASE_URL=http://localhost:3999 npm run e2e`. 캡처는 `e2e-artifacts/`.
+- 단어 게임 스모크: 서버를 `BACKSTAGE_TEST_ROUND_MS=20000 PORT=3999`로 띄운 뒤 `BASE_URL=http://localhost:3999 npm run e2e:words` (라운드 5분을 20초로 줄임 — 테스트 전용).
 
 ## 방과 매치의 흐름
 
@@ -70,6 +75,8 @@ npm run build && npm start   # 배포 모드: 서버가 빌드된 웹까지 제�
    - 시간은 `ctx.now()`·`ctx.setTimer()`만 쓴다 (테스트에서 가짜 시계로 돌릴 수 있게).
    - **비밀 정보는 `view(playerId)`에서 볼 권한이 있는 사람에게만 넣는다.** 서버는 view를 플레이어별로 따로 보낸다.
    - 끝나면 `ctx.end({ ranking, headlines })` — 순위만 주면 방 점수 합산은 플랫폼이 한다.
+   - 본인만 알아야 하는 변화는 `ctx.updatePlayer(id)`로 그 사람에게만 다시 보낸다.
+   - 그룹별 채팅이 필요하면 `onChat`에서 `{ allow: true, audience: [...] }`, 알림은 `ctx.say(text, audience)` — 그 사람들에게만 보이고 재접속 기록도 걸러진다.
 3. **등록:** `apps/server/src/games/registry.ts`의 `GAMES`에 추가 → 로비 목록·방 설정 UI·관리자 통계에 자동으로 나타난다.
 4. **화면:** `apps/web/src/games/<id>/View.tsx`를 만들고 `apps/web/src/games/registry.tsx`에 등록. 채팅이 입력이면 `chatIsInput: true`.
 5. **테스트:** `apps/server/test/`에 규칙 테스트를 추가 (가짜 시계 `FakeClock` 사용).

@@ -200,3 +200,10 @@
 - 영향 문서 / 게임 버전: catalog/games/KKT.md(0.4), catalog/INDEX. 코드: apps/server/src/games/kkt (KKT_RULES, kktTurnMs), apps/web/src/games/kkt.
 - 재검수 조건: 사람 테스트에서 초반이 늘어지거나(10초가 김) 후반 3초가 너무 가혹하다는 반응이 반복될 때.
 - 대체한 결정 ID: DEC-05 보충(0.2)의 “차례당 5초”, “한 번 실패 즉시 탈락”
+
+- DEC-18 / 2026-09-30 / accepted
+- 질문 및 결정: 단어 말하기(WORD)·금지어(BAN)를 **AI(API) 없이** 구현한다. 단어는 미리 고른 풀(풀 1 100·풀 2 130·풀 3 80개, `pools-1`), 사회자 물꼬는 미리 쓴 문장 40개. 스펙의 “AI 실패 시 대체” 경로만 쓰는 것이라 규칙은 그대로다. 분류 `ai_intervention`은 low → **none** (Roblox 후보에 포함).
+- 근거: 사용자 결정 (2026-09-30 대화: “둘 다 추가해 보자”, 직전 제안 “API 없이 먼저”), DEC-01(미리 고른 단어가 낫다), [ASTRA 구현 확인](reviews/2026-09-30-ASTRA-WORD-BAN-impl.md).
+- 대안과 이유: AI 공급자를 정하고 연결(OPEN-06) — 비용·키·지연 부담, 지금은 풀 확장으로 충분. 나중에 다양성이 필요하면 스펙의 AI 호출 지점에 붙인다.
+- 영향 문서 / 게임 버전: catalog/games/WORD.md·BAN.md(0.4 구현 메모), catalog/INDEX, IMPLEMENTATION-BACKLOG, 00-STATUS, ARCHITECTURE. 코드: apps/server/src/games/{word,ban,wordcore}, 방 채팅 `audience`(그룹 채팅), `GameContext.updatePlayer`.
+- 재검수 조건: 같은 단어가 자주 반복된다는 반응, 또는 AI 단어 공급을 붙일 때.

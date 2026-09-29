@@ -9,8 +9,8 @@
 ## 사람 테스트 대기 후보 (astra_passed)
 | ID / 게임 | mode | relationship | length | ai_intervention | min | recommended | max | 상태 / 구현 |
 |---|---|---|---|---|---:|---|---:|---|
-| [WORD / 단어 말하기](games/WORD.md) | individual | both | medium | low | 3 | [4,5,6] | 8 | astra_passed / not_started |
-| [BAN / 금지어](games/BAN.md) | individual | both | short | low | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
+| [WORD / 단어 말하기](games/WORD.md) | individual | both | medium | none (DEC-18) | 3 | [4,5,6] | 8 | astra_passed / prototype |
+| [BAN / 금지어](games/BAN.md) | individual | both | short | none (DEC-18) | 3 | [3,4,5,6] | 8 | astra_passed / prototype |
 | [KKT / 쿵쿵따](games/KKT.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / prototype |
 | [NUNCHI / 눈치게임](games/NUNCHI.md) | individual | both | short | none | 4 | [4,5,6,7,8] | 8 | astra_passed / prototype |
 | [WHO / 포브스](games/WHO.md) | individual | friends | short | none | 3 | [4,5,6,7,8] | 8 | astra_passed / prototype |
@@ -77,3 +77,4 @@ SD 관계·길이·인원은 원대화 카탈로그·인원 예시에 근거하�
 | 2026-09-29 | WORD 0.1→0.2, 분류 필드 추가 | 개인전 확정, 단어 형태 규칙 추가 (DEC-03). 전 항목에 `mode` 분류 추가 — SD·EK 값은 가설 |
 | 2026-09-29 | KKT 0.3 구현 | 쿵쿵따 프로토타입 구현 — 표준국어대사전 세 글자 96,217단어, 사운드 실험 포함 (DEC-16). ASTRA 구현 확인 치명 0건 |
 | 2026-09-29 | KKT 0.3→0.4 | 틀린 단어 재시도, 차례 시간 점점 감소 (DEC-17) |
+| 2026-09-30 | WORD·BAN 0.4 구현 | AI 없이 미리 고른 단어 풀로 프로토타입 구현, ai_intervention low→none, 금지어 그룹 채팅 (DEC-18). ASTRA 구현 확인 치명 1건 수정 후 pass |

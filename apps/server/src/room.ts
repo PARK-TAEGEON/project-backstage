@@ -86,7 +86,8 @@ export class Room {
   private phaseDeadline: number | null = null;
   private phaseTimer: TimerId | null = null;
   private settings: RoomSettings;
-  private chatLog: ChatMessage[] = [];
+  /** audience가 있으면 그 사람들에게만 보이는 메시지 (그룹 채팅). 전송할 때는 audience를 떼고 보낸다 */
+  private chatLog: (ChatMessage & { audience?: string[] })[] = [];
   private match: MatchState | null = null;
   private closed = false;
 
@@ -147,7 +148,7 @@ export class Room {
     if (!this.hostId) this.hostId = id;
     this.sink.record({ type: 'player_joined', roomId: this.id, playerCount: this.memberCount() });
     this.systemChat(`${nickname} 님이 들어왔어요.`);
-    this.transport.chatHistory(id, this.chatLog);
+    this.transport.chatHistory(id, this.historyFor(id));
     this.broadcastState();
     return { ok: true, playerId: id, token };
   }
@@ -161,7 +162,7 @@ export class Room {
       this.clock.clearTimeout(p.graceTimer);
       p.graceTimer = null;
     }
-    this.transport.chatHistory(playerId, this.chatLog);
+    this.transport.chatHistory(playerId, this.historyFor(playerId));
     this.broadcastState();
     this.sendGameView(playerId);
     return true;
@@ -385,7 +386,10 @@ export class Room {
       update: () => {
         if (!running.ended) this.sendGameViews();
       },
-      say: (text) => this.systemChat(text, 'game'),
+      updatePlayer: (id) => {
+        if (!running.ended) this.sendGameView(id);
+      },
+      say: (text, audience) => this.pushChat({ id: randomUUID(), text, at: Date.now(), kind: 'game' }, audience),
       end: (outcome) => {
         if (running.ended) return;
         this.finishGame(outcome, game.meta.id, participants);
@@ -499,6 +503,7 @@ export class Room {
     }
     p.chatTimes.push(now);
     const running = this.match?.running;
+    let audience: string[] | undefined;
     if (this.phase === 'playing' && running && !running.ended && running.participants.includes(playerId) && running.instance.onChat) {
       const holder: { d: ChatDecision } = { d: { allow: true } };
       this.safe(running, () => {
@@ -508,8 +513,9 @@ export class Room {
         this.transport.toast(playerId, holder.d.reason);
         return;
       }
+      audience = holder.d.audience;
     }
-    this.pushChat({ id: randomUUID(), from: playerId, text, at: Date.now(), kind: 'user' });
+    this.pushChat({ id: randomUUID(), from: playerId, text, at: Date.now(), kind: 'user' }, audience);
   }
 
   action(playerId: string, requestId: unknown, action: unknown, receivedAt: number) {
@@ -530,10 +536,18 @@ export class Room {
     this.pushChat({ id: randomUUID(), text, at: Date.now(), kind });
   }
 
-  private pushChat(msg: ChatMessage) {
-    this.chatLog.push(msg);
+  private pushChat(msg: ChatMessage, audience?: string[]) {
+    this.chatLog.push(audience ? { ...msg, audience: [...audience] } : msg);
     if (this.chatLog.length > CHAT_HISTORY) this.chatLog.shift();
-    this.transport.chat(this.members().filter((m) => m.connected).map((m) => m.id), msg);
+    const to = this.members().filter((m) => m.connected && (!audience || audience.includes(m.id)));
+    this.transport.chat(
+      to.map((m) => m.id),
+      msg,
+    );
+  }
+
+  private historyFor(playerId: string): ChatMessage[] {
+    return this.chatLog.filter((m) => !m.audience || m.audience.includes(playerId)).map(({ audience: _a, ...m }) => m);
   }
 
   private setPhase(phase: RoomPhase, ms: number, next: () => void) {

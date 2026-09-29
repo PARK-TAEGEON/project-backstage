@@ -49,11 +49,16 @@ function setup() {
   const states = new Map<string, RoomView>();
   const views = new Map<string, unknown>();
   const chats: ChatMessage[] = [];
+  const delivered = new Map<string, ChatMessage[]>();
+  const histories = new Map<string, ChatMessage[]>();
   const transport: RoomTransport = {
     state: (pid, v) => states.set(pid, v),
     gameView: (pid, _g, v) => views.set(pid, v),
-    chat: (_ids, m) => chats.push(m),
-    chatHistory: () => {},
+    chat: (ids, m) => {
+      chats.push(m);
+      for (const id of ids) delivered.set(id, [...(delivered.get(id) ?? []), m]);
+    },
+    chatHistory: (pid, msgs) => histories.set(pid, msgs),
     toast: () => {},
   };
   let closed = false;
@@ -63,7 +68,7 @@ function setup() {
     if (!r.ok) throw new Error(r.error);
     return r.playerId;
   };
-  return { clock, sink, states, views, chats, room, add, isClosed: () => closed };
+  return { clock, sink, states, views, chats, delivered, histories, room, add, isClosed: () => closed };
 }
 
 describe('방 · 매치 흐름', () => {
@@ -137,7 +142,8 @@ describe('방 · 매치 흐름', () => {
     s = t.states.get(h)!;
     expect(s.phase).toBe('final');
     expect(s.match!.scores).toEqual({ [h]: 8, [b]: 8, [c]: 8, [d]: 5 });
-    expect(s.match!.finalRanking).toEqual([[h, b, c], [d]]);
+    // 공동 순위 안의 순서는 상관없다 (id가 숫자로만 되면 객체 키 순서가 바뀐다)
+    expect(s.match!.finalRanking!.map((g) => [...g].sort())).toEqual([[h, b, c].sort(), [d]]);
 
     const stats = computeStats(t.sink.all(), null, GAME_METAS.map((m) => m.id));
     expect(stats.totals.matchesCompleted).toBe(1);
@@ -225,5 +231,29 @@ describe('방 · 매치 흐름', () => {
     t.clock.advance(20_000);
     t.clock.advance(ROOM_TIMING.gameResultMs + ROOM_TIMING.introMs);
     expect(t.states.get(h)!.phase).toBe('final');
+  });
+});
+
+describe('그룹 채팅 (금지어 7명)', () => {
+  it('게임 중 그룹 채팅은 같은 그룹에게만 전달되고, 재접속 기록에도 다른 그룹 메시지가 없다', () => {
+    const t = setup();
+    const ids = ['방장', 'b', 'c', 'd', 'e', 'f', 'g'].map(t.add);
+    const host = ids[0]!;
+    t.room.updateSettings(host, { enabledGameIds: ['ban'], gameRounds: 1 });
+    for (const id of ids.slice(1)) t.room.setReady(id, true);
+    expect(t.room.start(host)).toBeNull();
+    t.clock.advance(ROOM_TIMING.introMs + 6000); // 전광판 → 금지어 소개 → 진행
+    const v = t.views.get(host) as { group: { id: string }[]; groupCount: number };
+    expect(v.groupCount).toBe(2);
+    const mine = v.group.map((g) => g.id);
+    const other = ids.find((id) => !mine.includes(id))!;
+    t.room.chat(host, '우리 조만 보는 말', t.clock.now());
+    const got = (id: string) => (t.delivered.get(id) ?? []).some((m) => m.text === '우리 조만 보는 말');
+    for (const id of mine) expect(got(id)).toBe(true);
+    expect(got(other)).toBe(false);
+    t.room.disconnect(other);
+    const token = (t.room as unknown as { players: Map<string, { token: string }> }).players.get(other)!.token;
+    t.room.resume(other, token);
+    expect((t.histories.get(other) ?? []).some((m) => m.text === '우리 조만 보는 말')).toBe(false);
   });
 });

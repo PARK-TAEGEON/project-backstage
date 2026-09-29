@@ -21,7 +21,12 @@ export interface GameOutcome {
   aborted?: boolean;
 }
 
-export type ChatDecision = { allow: true } | { allow: false; reason: string };
+/**
+ * 채팅 판정 결과.
+ * - allow: true — 방에 올린다. audience를 주면 그 사람들에게만 보인다 (예: 금지어 그룹 채팅).
+ * - allow: false — 올리지 않고 보낸 사람에게 reason을 알린다 (예: 입막힘).
+ */
+export type ChatDecision = { allow: true; audience?: string[] } | { allow: false; reason: string };
 
 export interface GameContext {
   /** 게임 시작 시점 참가자 (고정) */
@@ -37,8 +42,13 @@ export interface GameContext {
   activePlayerIds(): string[];
   /** 상태가 바뀌었으니 모두에게 각자의 view를 다시 보낸다 */
   update(): void;
-  /** 채팅창에 게임 알림 한 줄 */
-  say(text: string): void;
+  /**
+   * 한 사람에게만 view를 다시 보낸다. 본인만 알아야 하는 변화(예: 단어 말하기 득점)에 쓴다 —
+   * 모두에게 보내면 “이 메시지 직후 갱신이 왔다”는 사실로 비밀이 드러날 수 있다.
+   */
+  updatePlayer?(playerId: string): void;
+  /** 채팅창에 게임 알림 한 줄. audience를 주면 그 사람들에게만 보인다 */
+  say(text: string, audience?: string[]): void;
   /** 게임 종료. 한 번만 유효하다. */
   end(outcome: GameOutcome): void;
   random(): number;
