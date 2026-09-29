@@ -3,6 +3,7 @@ import { useRemaining } from '../../state/RoomProvider';
 import { Avatar } from '../../ui/Avatar';
 import { Marquee, TimerBar } from '../../ui/Marquee';
 import type { GameViewProps } from '../registry';
+import { Standings } from '../wordcore/Standings';
 import s from '../wordcore/WordGames.module.css';
 
 /** 서버 WordView와 같은 모양 (apps/server/src/games/word) */
@@ -23,8 +24,6 @@ interface View {
   totals: Record<string, number>;
   reveal?: { id: string; word: string; pool: 1 | 2 | 3; uses: number; challengePoints: number; roundScore: number; bestLine?: string; locked: boolean }[];
 }
-
-const POOL_NOTE = { 1: '입버릇 단어 — 숨기기 쉬워요', 2: '생활 단어 — 자연스럽게!', 3: '전문용어 — 쓰는 순간 의심받아요 😈' } as const;
 
 export function WordView({ view, receivedAt, players, meId, sendAction }: GameViewProps<View>) {
   const byId = new Map(players.map((p) => [p.id, p]));
@@ -61,7 +60,7 @@ export function WordView({ view, receivedAt, players, meId, sendAction }: GameVi
   if (view.phase === 'intro' && view.myWord) {
     return (
       <div className={s.wrap}>
-        <Marquee size="md" kicker={`단어 말하기 · ${view.round} / ${view.rounds}라운드 · 나만 보여요`} title={view.myWord.word} subtitle={POOL_NOTE[view.myWord.pool]} />
+        <Marquee size="md" kicker={`단어 말하기 · ${view.round} / ${view.rounds}라운드`} title={view.myWord.word} />
       </div>
     );
   }
@@ -77,7 +76,7 @@ export function WordView({ view, receivedAt, players, meId, sendAction }: GameVi
               <th>이름 · 단어</th>
               <th className={s.num}>사용</th>
               <th className={s.num}>챌린지</th>
-              <th className={s.num}>점수</th>
+              <th className={s.num}>라운드</th>
             </tr>
           </thead>
           <tbody>
@@ -95,6 +94,7 @@ export function WordView({ view, receivedAt, players, meId, sendAction }: GameVi
             ))}
           </tbody>
         </table>
+        <Standings rows={rows.map((r) => ({ id: r.id, round: r.roundScore, total: view.totals[r.id] ?? 0 }))} players={players} meId={meId} />
         {remaining !== undefined && view.phase === 'reveal' && <TimerBar remainingMs={remaining} totalMs={10_000} />}
       </div>
     );
@@ -113,28 +113,24 @@ export function WordView({ view, receivedAt, players, meId, sendAction }: GameVi
 
       {view.myWord && (
         <section className={`${s.secret} ${view.myLocked ? s.locked : ''}`}>
-          <span className="faint">내 단어 (나만 보여요)</span>
+          <span className="faint">내 단어</span>
           <span className={`${s.secretWord} display`} data-testid="word-mine">
             {view.myWord.word}
           </span>
-          <span className={view.myWord.pool === 3 ? s.pool3 : 'dim'}>{POOL_NOTE[view.myWord.pool]}</span>
           <div className={s.stats}>
             <span className="badge">이번 라운드 {view.myRoundScore}점</span>
             <span className="badge">사용 {view.myUses}회</span>
             {view.myLocked ? (
-              <span className="badge">🔒 들켰어요 — 챌린지로 만회!</span>
+              <span className="badge">🔒 잠김</span>
             ) : nextScore ? (
-              <span className="badge">다음 득점까지 {Math.ceil(nextScore / 1000)}초</span>
+              <span className="badge">⏳ {Math.ceil(nextScore / 1000)}초</span>
             ) : (
-              <span className="badge">지금 쓰면 +1</span>
+              <span className="badge">+1 가능</span>
             )}
           </div>
         </section>
       )}
 
-      <p className="dim" style={{ margin: 0, textAlign: 'center' }}>
-        수상한 사람을 눌러 단어를 맞혀 보세요 — 맞히면 +3, 틀리면 −3
-      </p>
       <ul className={s.people}>
         {view.players
           .filter((p) => p.id !== meId)
@@ -189,7 +185,6 @@ export function WordView({ view, receivedAt, players, meId, sendAction }: GameVi
           ))}
         </ul>
       )}
-      <p className={s.small}>득점은 나만 알아요. 다른 사람 점수는 라운드가 끝나면 공개돼요.</p>
     </div>
   );
 }

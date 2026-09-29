@@ -111,7 +111,7 @@ export class SilenceHost {
     const now = this.ctx.now();
     if (now - this.lastHuman >= HOST_TIMING.silenceMs && now - this.lastHost >= HOST_TIMING.minGapMs) {
       const line = this.pickLine();
-      if (line) this.ctx.say(`🎙 사회자: ${line}`, this.audience?.());
+      if (line) this.ctx.say(`🎙 ${line}`, this.audience?.(), 'host');
       this.lastHost = now; // 문장이 없어도 이번 회차는 넘어간다
     }
     this.schedule();

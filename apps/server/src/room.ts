@@ -389,7 +389,7 @@ export class Room {
       updatePlayer: (id) => {
         if (!running.ended) this.sendGameView(id);
       },
-      say: (text, audience) => this.pushChat({ id: randomUUID(), text, at: Date.now(), kind: 'game' }, audience),
+      say: (text, audience, style) => this.pushChat({ id: randomUUID(), text, at: Date.now(), kind: style === 'host' ? 'host' : 'game' }, audience),
       end: (outcome) => {
         if (running.ended) return;
         this.finishGame(outcome, game.meta.id, participants);

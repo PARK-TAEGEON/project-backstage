@@ -98,7 +98,8 @@ for (let r = 1; r <= 3; r++) {
 // ── 금지어 ──
 for (let r = 1; r <= 2; r++) {
   await host.getByTestId(/ban-word-/).first().waitFor({ timeout: 40_000 });
-  await host.getByText('남이 자기 금지어를', { exact: false }).waitFor({ state: 'detached', timeout: 10_000 }).catch(() => {});
+  // 소개(전광판) 단계가 끝나 진행 단계가 될 때까지
+  for (const pg of players) await pg.getByText('내 금지어만 안 보여요').waitFor({ state: 'detached', timeout: 10_000 });
   await host.waitForTimeout(300);
   // 방장 화면에서 둘째의 금지어를 읽는다 (자기 것은 없어야 함)
   const cards = await host.locator('[data-testid^="ban-word-"]').evaluateAll((els) => els.map((e) => [e.getAttribute('data-testid'), e.textContent]));

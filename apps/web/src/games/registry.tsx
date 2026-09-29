@@ -31,6 +31,6 @@ export const WEB_GAMES: Record<string, WebGame> = {
   nunchi: { View: NunchiView, chatIsInput: true, chatHint: '숫자 입력 (1~8)' },
   forbes: { View: ForbesView },
   kkt: { View: KktView },
-  word: { View: WordView, chatIsInput: true, chatHint: '평소처럼 채팅하면서 내 단어를 몰래…' },
-  ban: { View: BanView, chatIsInput: true, chatHint: '말조심! 내 금지어는 나만 몰라요' },
+  word: { View: WordView, chatIsInput: true, chatHint: '메시지 입력' },
+  ban: { View: BanView, chatIsInput: true, chatHint: '메시지 입력' },
 };

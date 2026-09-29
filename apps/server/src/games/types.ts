@@ -47,8 +47,8 @@ export interface GameContext {
    * 모두에게 보내면 “이 메시지 직후 갱신이 왔다”는 사실로 비밀이 드러날 수 있다.
    */
   updatePlayer?(playerId: string): void;
-  /** 채팅창에 게임 알림 한 줄. audience를 주면 그 사람들에게만 보인다 */
-  say(text: string, audience?: string[]): void;
+  /** 채팅창에 게임 알림 한 줄. audience를 주면 그 사람들에게만 보인다. style 'host'는 사회자 대사(굵고 크게) */
+  say(text: string, audience?: string[], style?: 'host'): void;
   /** 게임 종료. 한 번만 유효하다. */
   end(outcome: GameOutcome): void;
   random(): number;

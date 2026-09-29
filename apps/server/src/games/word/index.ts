@@ -13,11 +13,11 @@ import { WORD_POOLS_VERSION } from '../wordcore/pools.js';
 export const WORD_META: GameMeta = {
   id: 'word',
   name: '단어 말하기',
-  specVersion: '0.4',
+  specVersion: '0.5',
   tagline: '몰래 받은 단어를 채팅에 끼워 넣어라! 들키면 역습당한다',
   mode: 'individual',
   relationship: 'both',
-  length: 'medium',
+  length: 'short',
   ai: 'none',
   inputs: ['chat', 'text'],
   platforms: ['web', 'roblox'],
@@ -27,11 +27,11 @@ export const WORD_META: GameMeta = {
   settings: [],
 };
 
-/** 고정 규칙 (WORD 0.4 기본값, DEC-15). ctx.settings로 덮어쓰는 것은 테스트에서만 */
+/** 고정 규칙 (WORD 0.5: 90초 × 3라운드, 득점 간격 10초 — DEC-20). ctx.settings로 덮어쓰는 것은 테스트에서만 */
 export const WORD_RULES = {
   rounds: 3,
-  roundMs: 5 * 60_000,
-  scoreGapMs: 15_000,
+  roundMs: 90_000,
+  scoreGapMs: 10_000,
   challengeGapMs: 3000,
   sameTargetGapMs: 10_000,
   challengePoints: 3,
@@ -179,7 +179,7 @@ class WordGame implements GameInstance {
     this.host?.stop();
     this.host = new SilenceHost(this.ctx, () => [...this.state.values()].map((s) => s.word.word));
     this.setPhase('play', this.roundMs, () => this.endRound());
-    this.ctx.say(`💬 ${this.round}라운드 시작! 내 단어를 몰래 끼워 넣으세요 (${formatDuration(this.roundMs)})`);
+    this.ctx.say(`💬 ${this.round}라운드 시작! (${formatDuration(this.roundMs)})`);
   }
 
   // ───────── 입력 ─────────
@@ -189,7 +189,7 @@ class WordGame implements GameInstance {
     this.host?.heard();
     const st = this.state.get(pid);
     if (!st) return { allow: true };
-    // 처리 순서 (W-2): 마감 전 → 잠금 아님 → 마지막 실제 득점 후 15초 → 단어 포함
+    // 처리 순서 (W-2): 마감 전 → 잠금 아님 → 마지막 실제 득점 후 10초 → 단어 포함
     if (st.locked) return { allow: true };
     if (t - st.lastScoreAt < WORD_RULES.scoreGapMs) return { allow: true };
     if (!containsWord(text, st.word.word)) return { allow: true };

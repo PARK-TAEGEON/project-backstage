@@ -120,11 +120,14 @@ describe('단어 말하기 (WORD 0.4, AI 없음)', () => {
   };
   const v = (h: ReturnType<typeof start>, id: string) => h.inst.view(id) as WordView;
 
-  it('기본 규칙: AI 없음, 3라운드×5분, 방 설정 없음', () => {
+  it('기본 규칙 (DEC-20): AI 없음, 90초×3라운드, 득점 간격 10초, 방 설정 없음', () => {
     expect(word.meta.ai).toBe('none');
     expect(word.meta.settings).toEqual([]);
     expect(WORD_RULES.rounds).toBe(3);
-    expect(WORD_RULES.roundMs).toBe(300_000);
+    expect(WORD_RULES.roundMs).toBe(90_000);
+    expect(WORD_RULES.scoreGapMs).toBe(10_000);
+    expect(BAN_RULES.rounds).toBe(2);
+    expect(BAN_RULES.roundMs).toBe(120_000);
   });
 
   it('비밀: 내 단어는 나에게만, 남의 view에는 없다', () => {
@@ -293,6 +296,21 @@ describe('금지어 (BAN 0.4, AI 없음)', () => {
     h.act('b', { type: 'challenge', guess: '틀렸지롱' }, 100);
     expect(v(h, 'b').me.status).toBe('muted');
     expect(v(h, 'b').scores.b).toBe(1 - 3);
+  });
+
+  it('라운드 공개에 라운드 획득 점수가 들어가고, 누적은 scores', () => {
+    const h = start(['a', 'b', 'c']);
+    h.chat('a', wordOf(h, 'a')); // b,c +1
+    h.clock.advance(BAN_RULES.roundMs);
+    const r = v(h, 'b').reveal!;
+    expect(r.find((x) => x.id === 'b')!.roundScore).toBe(1);
+    expect(r.find((x) => x.id === 'a')!.roundScore).toBe(0);
+    h.clock.advance(BAN_TIMING.revealMs + BAN_TIMING.introMs);
+    h.chat('b', wordOf(h, 'b')); // a,c +1
+    h.clock.advance(BAN_RULES.roundMs);
+    const r2 = v(h, 'c').reveal!;
+    expect(r2.find((x) => x.id === 'c')!.roundScore).toBe(1);
+    expect(v(h, 'c').scores.c).toBe(2);
   });
 
   it('챌린지 결과는 적발 한 번에 한 번만, 기한 뒤 응답 무효', () => {

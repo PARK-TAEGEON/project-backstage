@@ -73,7 +73,8 @@ export interface ChatMessage {
   from?: string;
   text: string;
   at: number;
-  kind: 'user' | 'system' | 'game';
+  /** host = 사회자(물꼬 트기) 대사 — 굵고 크게 */
+  kind: 'user' | 'system' | 'game' | 'host';
 }
 
 export type Ack<T = {}> = ({ ok: true } & T) | { ok: false; error: string };

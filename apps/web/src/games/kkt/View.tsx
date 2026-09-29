@@ -139,7 +139,7 @@ export function KktView({ view, receivedAt, players, meId, sendAction }: GameVie
                 ✖ {view.rejected.id === meId ? '' : `${nick(view.rejected.id)} `}「{view.rejected.word}」 {FAIL_TEXT[view.rejected.reason]}! 다시!
               </span>
             ) : (
-              <span className="faint">(으)로 시작하는 세 글자 · 이번 차례 {view.turnMs / 1000}초</span>
+              <span className="faint">⏱ {view.turnMs / 1000}초</span>
             )}
           </>
         ) : (
@@ -194,7 +194,6 @@ export function KktView({ view, receivedAt, players, meId, sendAction }: GameVie
           </button>
         </form>
       )}
-      {!myTurn && view.phase === 'turn' && <p className={`${s.hint} dim`}>{view.me === 'alive' ? '내 차례가 아닐 땐 채팅으로 마음껏 방해하세요 😈' : '탈락… 채팅으로 방해는 가능!'}</p>}
 
       {view.chain.length > 0 && (
         <ol className={s.chain} data-testid="kkt-chain">

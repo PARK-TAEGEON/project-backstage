@@ -9,7 +9,7 @@
 ## 사람 테스트 대기 후보 (astra_passed)
 | ID / 게임 | mode | relationship | length | ai_intervention | min | recommended | max | 상태 / 구현 |
 |---|---|---|---|---|---:|---|---:|---|
-| [WORD / 단어 말하기](games/WORD.md) | individual | both | medium | none (DEC-18) | 3 | [4,5,6] | 8 | astra_passed / prototype |
+| [WORD / 단어 말하기](games/WORD.md) | individual | both | short (DEC-20) | none (DEC-18) | 3 | [4,5,6] | 8 | astra_passed / prototype |
 | [BAN / 금지어](games/BAN.md) | individual | both | short | none (DEC-18) | 3 | [3,4,5,6] | 8 | astra_passed / prototype |
 | [KKT / 쿵쿵따](games/KKT.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / prototype |
 | [NUNCHI / 눈치게임](games/NUNCHI.md) | individual | both | short | none | 4 | [4,5,6,7,8] | 8 | astra_passed / prototype |
@@ -25,7 +25,7 @@
 
 **NUNCHI — 눈치게임**(DEC-09): 1부터 숫자를 채팅에 친다. 4명부터. 같은 숫자를 늦게 치거나(동시 0.001초) 끝까지 못 치면 탈락 — 걸리는 순간 라운드 종료, 보통 탈락 1명. 3라운드, 중앙 3·2·1 카운트다운. 상세 룰은 [스펙](games/NUNCHI.md)이 원본이다.
 
-**BATCH-01 (5개) — ASTRA 통과(치명 0건), 사람 테스트 대기.** 리뷰: [1차](../reviews/2026-09-29-ASTRA-BATCH-01.md), [2차](../reviews/2026-09-29-ASTRA-BATCH-01-r2.md). 현재 버전: WORD 0.4, BAN 0.4, KKT 0.4, WHO 0.4, NUNCHI 0.3. 비치명 지적은 [구현 백로그](IMPLEMENTATION-BACKLOG.md). 공통 판정은 [09-ENGINE-RULES](../09-ENGINE-RULES.md). 인원·시간은 검증 전 가설, FABLE·사람 리뷰 기록 없음.
+**BATCH-01 (5개) — ASTRA 통과(치명 0건), 사람 테스트 대기.** 리뷰: [1차](../reviews/2026-09-29-ASTRA-BATCH-01.md), [2차](../reviews/2026-09-29-ASTRA-BATCH-01-r2.md). 현재 버전: WORD 0.5, BAN 0.5, KKT 0.4, WHO 0.4, NUNCHI 0.3. 비치명 지적은 [구현 백로그](IMPLEMENTATION-BACKLOG.md). 공통 판정은 [09-ENGINE-RULES](../09-ENGINE-RULES.md). 인원·시간은 검증 전 가설, FABLE·사람 리뷰 기록 없음.
 
 ## 보류 후보
 분류와 인원은 원대화 제안 또는 이번 이식용 가설이다. 특히 3명 성립 여부는 미검증이다.
@@ -79,3 +79,4 @@ SD 관계·길이·인원은 원대화 카탈로그·인원 예시에 근거하�
 | 2026-09-29 | KKT 0.3→0.4 | 틀린 단어 재시도, 차례 시간 점점 감소 (DEC-17) |
 | 2026-09-30 | WORD·BAN 0.4 구현 | AI 없이 미리 고른 단어 풀로 프로토타입 구현, ai_intervention low→none, 금지어 그룹 채팅 (DEC-18). ASTRA 구현 확인 치명 1건 수정 후 pass |
 | 2026-09-30 | KKT 사전 보강 | 표준국어대사전 + 우리말샘(2026-06 빌드), 96,217 → 197,543단어 (DEC-19) |
+| 2026-09-30 | WORD·BAN 0.4→0.5 | 단어 말하기 90초×3라운드·득점 간격 10초, 금지어 120초×2라운드, [현재 순위] 표 (DEC-20) |

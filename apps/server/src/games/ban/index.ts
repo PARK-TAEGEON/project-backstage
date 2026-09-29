@@ -15,7 +15,7 @@ import { formatDuration } from '../word/index.js';
 export const BAN_META: GameMeta = {
   id: 'ban',
   name: '금지어',
-  specVersion: '0.4',
+  specVersion: '0.5',
   tagline: '내 금지어만 모른다! 남이 말하게 만들어라',
   mode: 'individual',
   relationship: 'both',
@@ -29,8 +29,8 @@ export const BAN_META: GameMeta = {
   settings: [],
 };
 
-/** 고정 규칙 (BAN 0.4 기본값, DEC-15). ctx.settings로 덮어쓰는 것은 테스트에서만 */
-export const BAN_RULES = { rounds: 2, roundMs: 5 * 60_000, challengeMs: 10_000, muteMs: 10_000, challengePoints: 3 };
+/** 고정 규칙 (BAN 0.5: 120초 × 2라운드 — DEC-20). ctx.settings로 덮어쓰는 것은 테스트에서만 */
+export const BAN_RULES = { rounds: 2, roundMs: 120_000, challengeMs: 10_000, muteMs: 10_000, challengePoints: 3 };
 export const BAN_TIMING = { introMs: 5000, revealMs: 10_000 };
 
 type Status = 'normal' | 'pending' | 'muted' | 'cleared';
@@ -101,7 +101,8 @@ export interface BanView {
   /** 이번 라운드 내 그룹 사건 */
   events: BanEvent[];
   /** 라운드 공개: 모든 사람의 금지어와 적발 횟수 */
-  reveal?: { id: string; word: string; caught: number; groupNo: number; lines: string[] }[];
+  /** roundScore = 이번 라운드에 얻은 점수, 누적은 scores */
+  reveal?: { id: string; word: string; caught: number; groupNo: number; lines: string[]; roundScore: number }[];
   poolsVersion: string;
 }
 
@@ -137,6 +138,8 @@ class BanGame implements GameInstance {
   private prevGroups: string[][] = [];
   private state = new Map<string, PState>();
   private scores = new Map<string, number>();
+  /** 라운드 시작 때 점수 (라운드 획득 점수 계산용) */
+  private roundStartScores = new Map<string, number>();
   private caughtTotal = new Map<string, number>();
   private usedWords = new Set<string>();
   private reveal?: BanView['reveal'];
@@ -189,6 +192,7 @@ class BanGame implements GameInstance {
     }
     this.round += 1;
     this.prevGroups = groups;
+    this.roundStartScores = new Map(this.scores);
     for (const s of this.state.values()) if (s.timer !== null) this.ctx.clearTimer(s.timer);
     this.state.clear();
     this.reveal = undefined;
@@ -209,7 +213,7 @@ class BanGame implements GameInstance {
     const intro =
       this.groups.length > 1
         ? `🔀 ${this.round}라운드 그룹: ${this.groups.map((g) => `${g.no}조 ${g.members.map((id) => this.name(id)).join('·')}`).join(' / ')}`
-        : `🤐 ${this.round}라운드 — 남의 금지어는 보이고, 내 것만 안 보여요`;
+        : `🤐 ${this.round}라운드`;
     this.ctx.say(intro);
     this.setPhase('intro', BAN_TIMING.introMs, () => this.beginPlay());
   }
@@ -267,7 +271,7 @@ class BanGame implements GameInstance {
     g.events.push({ kind: 'caught', id: pid });
     // 걸린 메시지가 먼저 채팅에 올라간 뒤 알림이 나오게 한 박자 늦춘다
     this.ctx.setTimer(1, () => {
-      this.ctx.say(`🚨 ${this.name(pid)} 님 금지어 적발! 나머지 전원 +1 — 챌린지할까요?`, g.members);
+      this.ctx.say(`🚨 ${this.name(pid)} 님 금지어 적발! 나머지 전원 +1`, g.members);
       this.ctx.update();
     });
     this.setPlayerTimer(pid, st.pendingUntil - this.ctx.now(), () => this.resolve(pid, 'skip'));
@@ -312,7 +316,7 @@ class BanGame implements GameInstance {
     } else {
       if (result === 'fail') this.scores.set(pid, (this.scores.get(pid) ?? 0) - pts);
       this.ctx.say(
-        result === 'fail' ? `💀 ${this.name(pid)} 님 나락 (추측: ${guess}) −${pts} · 🤐 입막힘` : `🤐 ${this.name(pid)} 님 입막힘 ${BAN_RULES.muteMs / 1000}초 — 마음껏 놀리세요`,
+        result === 'fail' ? `💀 ${this.name(pid)} 님 나락 (추측: ${guess}) −${pts} · 🤐 입막힘` : `🤐 ${this.name(pid)} 님 입막힘 ${BAN_RULES.muteMs / 1000}초`,
         g.members,
       );
       if (this.phase === 'play' && !g.ended) {
@@ -361,7 +365,14 @@ class BanGame implements GameInstance {
   private endAllGroups() {
     if (this.phase === 'reveal' || this.phase === 'done') return;
     for (const g of this.groups) this.endGroup(g);
-    this.reveal = [...this.state].map(([id, st]) => ({ id, word: st.word.word, caught: st.caught, groupNo: st.groupNo, lines: st.lines.slice(-2) }));
+    this.reveal = [...this.state].map(([id, st]) => ({
+      id,
+      word: st.word.word,
+      caught: st.caught,
+      groupNo: st.groupNo,
+      lines: st.lines.slice(-2),
+      roundScore: (this.scores.get(id) ?? 0) - (this.roundStartScores.get(id) ?? 0),
+    }));
     const summary = this.reveal.map((r) => `${this.name(r.id)} 「${r.word}」${r.caught ? ` ${r.caught}회 적발` : ''}`).join(' · ');
     this.ctx.say(`📋 ${this.round}라운드 금지어 공개: ${summary}`);
     const last = this.round >= this.rounds || this.ctx.activePlayerIds().length < 3;

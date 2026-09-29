@@ -49,7 +49,7 @@ export function ChatPanel({
         {messages.map((m) => {
           if (m.kind !== 'user') {
             return (
-              <div key={m.id} className={`${s.sys} ${m.kind === 'game' ? s.game : ''}`}>
+              <div key={m.id} className={`${s.sys} ${m.kind === 'game' ? s.game : ''} ${m.kind === 'host' ? s.host : ''}`} data-kind={m.kind}>
                 {m.text}
               </div>
             );

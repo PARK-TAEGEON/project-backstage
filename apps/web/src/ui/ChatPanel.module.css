@@ -91,3 +91,19 @@
 .form .btn {
   flex-shrink: 0;
 }
+
+/* 사회자(물꼬 트기) 대사 — 굵고 크게, 일반 본문 글꼴 */
+.host {
+  align-self: stretch;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--c-text);
+  text-align: center;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--c-accent-2);
+  background: color-mix(in srgb, var(--c-accent-2) 12%, transparent);
+}
