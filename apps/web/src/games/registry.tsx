@@ -6,6 +6,7 @@ import type { ComponentType } from 'react';
 import type { PlayerPublic, RoomView } from '@backstage/shared';
 import { NunchiView } from './nunchi/View';
 import { ForbesView } from './forbes/View';
+import { KktView } from './kkt/View';
 
 export interface GameViewProps<V = unknown> {
   view: V;
@@ -27,4 +28,5 @@ export interface WebGame {
 export const WEB_GAMES: Record<string, WebGame> = {
   nunchi: { View: NunchiView, chatIsInput: true, chatHint: '숫자 입력 (1~8)' },
   forbes: { View: ForbesView },
+  kkt: { View: KktView },
 };

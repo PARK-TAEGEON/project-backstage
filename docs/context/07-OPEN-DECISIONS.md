@@ -180,3 +180,13 @@
 - 영향 문서 / 게임 버전: catalog/games/NUNCHI.md(0.3), WHO.md, catalog/INDEX, 08-UI-NOTES, ARCHITECTURE. 코드: 게임 meta.settings 비움, 방 설정 UI에서 게임별 설정 제거.
 - 재검수 조건: 사람 테스트에서 4명 눈치게임이 너무 빨리 끝나거나, 0.001초 판정이 억울하다는 반응이 반복될 때.
 - 대체한 결정 ID: DEC-09의 동시 기준(0.01초)·인원, DEC-14의 “게임별 설정” 방 규칙 항목
+
+- DEC-16 / 2026-09-29 / accepted
+- 질문 및 결정: 이번에 추가할 게임은 **쿵쿵따(KKT 0.3 스펙 그대로)**이며 일반 끝말잇기가 아니다 (DEC-05 유지). 구현 세부:
+  1. 사전은 표준국어대사전 XML 스냅샷 `stdict-2019-06-25`(국립국어원 배포본, GitHub 미러)에서 `단어` 단위 표제어의 한글 세 글자 96,217개. 구·관용구·속담 제외. CC BY-SA 2.0 KR — 데이터 파일에 출처·라이선스 표기, 게임 화면에 출처 표시.
+  2. 1:1 결승은 09-ENGINE-RULES 4절(3명 미만 새 라운드 없음)의 예외로 둔다 (KKT 스펙의 N−1라운드 규칙 우선).
+  3. 입력칸은 생존자에게 항상 표시, 제출은 내 차례에만. 사운드는 Web Audio 합성.
+- 근거: 사용자 결정 (2026-09-29 대화: “쿵쿵따 구현” 선택), KKT.md 경기 구조 [확정], [ASTRA 구현 확인](reviews/2026-09-29-ASTRA-KKT-impl.md).
+- 대안과 이유: 일반 끝말잇기 — DEC-05에서 범위 밖으로 확정. 우리말샘 — 표준국어대사전 1종 고정(K-1). 최신 사전 API — 이 개발 환경에서 국립국어원 사이트 접속이 막혀 있어 공개 미러 스냅샷을 씀. 최신본으로 바꾸려면 `scripts/build-kkt-dict.py`로 다시 만든다.
+- 영향 문서 / 게임 버전: catalog/games/KKT.md(0.3 구현 메모), catalog/INDEX, IMPLEMENTATION-BACKLOG, 00-STATUS, ARCHITECTURE. 코드: apps/server/src/games/kkt, apps/server/dict, apps/web/src/games/kkt.
+- 재검수 조건: 사람 테스트에서 낯선 단어(방언·옛말·고유 명사)가 짜증을 부르거나, 2019년 스냅샷에 없는 흔한 단어 때문에 억울한 탈락이 반복될 때.

@@ -11,7 +11,7 @@
 |---|---|---|---|---|---:|---|---:|---|
 | [WORD / 단어 말하기](games/WORD.md) | individual | both | medium | low | 3 | [4,5,6] | 8 | astra_passed / not_started |
 | [BAN / 금지어](games/BAN.md) | individual | both | short | low | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
-| [KKT / 쿵쿵따](games/KKT.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
+| [KKT / 쿵쿵따](games/KKT.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / prototype |
 | [NUNCHI / 눈치게임](games/NUNCHI.md) | individual | both | short | none | 4 | [4,5,6,7,8] | 8 | astra_passed / prototype |
 | [WHO / 포브스](games/WHO.md) | individual | friends | short | none | 3 | [4,5,6,7,8] | 8 | astra_passed / prototype |
 
@@ -75,4 +75,4 @@ SD 관계·길이·인원은 원대화 카탈로그·인원 예시에 근거하�
 | 2026-09-29 | HR 폐기 | 숨은 규칙 후보를 구현 부담으로 폐기 (사용자 결정) |
 | 2026-09-29 | BAN 0.1 신규 | 금지어 candidate 등록, BATCH-01에 추가 (DEC-04) |
 | 2026-09-29 | WORD 0.1→0.2, 분류 필드 추가 | 개인전 확정, 단어 형태 규칙 추가 (DEC-03). 전 항목에 `mode` 분류 추가 — SD·EK 값은 가설 |
-
+| 2026-09-29 | KKT 0.3 구현 | 쿵쿵따 프로토타입 구현 — 표준국어대사전 세 글자 96,217단어, 사운드 실험 포함 (DEC-16). ASTRA 구현 확인 치명 0건 |

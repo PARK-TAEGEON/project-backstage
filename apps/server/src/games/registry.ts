@@ -6,8 +6,9 @@ import type { GameMeta } from '@backstage/shared';
 import type { ServerGame } from './types.js';
 import { nunchi } from './nunchi/index.js';
 import { forbes } from './forbes/index.js';
+import { kkt } from './kkt/index.js';
 
-export const GAMES: ServerGame[] = [nunchi, forbes];
+export const GAMES: ServerGame[] = [nunchi, forbes, kkt];
 
 export const GAME_METAS: GameMeta[] = GAMES.map((g) => g.meta);
 

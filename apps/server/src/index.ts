@@ -17,6 +17,7 @@ import { RealClock } from './clock.js';
 import { FileEventSink, computeStats } from './analytics.js';
 import { GAMES, GAME_METAS } from './games/registry.js';
 import { RoomManager } from './roomManager.js';
+import { defaultDictionary } from './games/kkt/dictionary.js';
 import type { RoomTransport } from './room.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -182,4 +183,11 @@ if (existsSync(WEB_DIST)) {
 httpServer.listen(PORT, () => {
   console.log(`[backstage] 서버 실행: http://localhost:${PORT}`);
   if (!ADMIN_TOKEN) console.log('[backstage] ADMIN_TOKEN이 없어 관리자 통계가 누구에게나 열려 있어요 (개발 모드).');
+  // 쿵쿵따 사전을 미리 읽어 둔다 (첫 경기 시작이 멈칫하지 않게). 실패하면 경기 시작 때 중단 처리된다.
+  try {
+    const d = defaultDictionary();
+    console.log(`[backstage] 쿵쿵따 사전 ${d.size.toLocaleString()}단어 (${d.version})`);
+  } catch (e) {
+    console.error('[backstage] 쿵쿵따 사전을 읽지 못했어요:', e);
+  }
 });

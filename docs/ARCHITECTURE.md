@@ -17,6 +17,8 @@ apps/server/            실시간 서버 (Node + Socket.IO, 모든 판정은 서
   src/games/registry.ts 게임 등록부
   src/games/nunchi/     눈치게임
   src/games/forbes/     포브스
+  src/games/kkt/        쿵쿵따 (두음법칙 표 hangul.ts, 사전 로더 dictionary.ts)
+  dict/                 쿵쿵따 사전 데이터 (표준국어대사전 세 글자, CC BY-SA — README 참고)
   src/analytics.ts      이벤트 저장(JSONL)과 통계 계산
   test/                 단위 테스트 (가짜 시계로 시간 판정 검증)
 apps/web/               웹 화면 (React + Vite)
@@ -26,7 +28,8 @@ apps/web/               웹 화면 (React + Vite)
   src/ui/               공통 부품 (아바타, 전광판, 채팅, 설정 패널 …)
   src/screens/          화면 (입장, 대기실, 경기, 관리자)
   src/games/            게임별 화면 + 등록부
-scripts/e2e-smoke.mjs   브라우저 3개로 한 매치를 끝까지 돌리는 스모크 테스트
+scripts/e2e-smoke.mjs   브라우저 4개로 한 매치(눈치게임→포브스→쿵쿵따)를 끝까지 돌리는 스모크 테스트
+scripts/build-kkt-dict.py  표준국어대사전 XML → 쿵쿵따 사전 파일
 ```
 
 ## 실행
