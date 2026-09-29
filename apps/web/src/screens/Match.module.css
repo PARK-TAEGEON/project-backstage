@@ -51,6 +51,15 @@
 .chat {
   height: 340px;
 }
+/* 폰: 채팅(입력칸)을 게임 화면 바로 아래로, 방 점수는 그 밑으로 */
+@media (max-width: 899px) {
+  .chat {
+    order: 1;
+  }
+  .scoreCard {
+    order: 2;
+  }
+}
 @media (min-width: 900px) {
   .cols {
     grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);

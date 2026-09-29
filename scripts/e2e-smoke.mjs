@@ -24,11 +24,13 @@ const exe = ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome', '/opt/pw-brow
 
 const browser = await chromium.launch({ executablePath: exe });
 const log = (...a) => console.log('[e2e]', ...a);
-const shot = (page, name) => page.screenshot({ path: `${OUT}/${name}.png`, fullPage: true });
+// MOBILE=1 이면 모든 브라우저를 작은 폰 화면(360×740)으로 열고 캡처 이름 앞에 m- 를 붙인다
+const MOBILE = process.env.MOBILE === '1';
+const shot = (page, name) => page.screenshot({ path: `${OUT}/${MOBILE ? 'm-' : ''}${name}.png`, fullPage: true });
 const errors = [];
 
 async function newPlayer(viewport = { width: 1280, height: 860 }) {
-  const ctx = await browser.newContext({ viewport });
+  const ctx = await browser.newContext({ viewport: MOBILE ? { width: 360, height: 740 } : viewport, isMobile: MOBILE, hasTouch: MOBILE });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => m.type() === 'error' && !/ERR_TUNNEL|fonts\.g/.test(m.text()) && errors.push(m.text()));

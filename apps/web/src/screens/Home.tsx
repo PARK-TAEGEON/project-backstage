@@ -133,11 +133,8 @@ export function Home() {
           {settings ? (
             <SettingsPanel settings={settings} catalog={catalog} editable playerCount={1} onChange={(p) => setSettings({ ...settings, ...p })} />
           ) : (
-            <p className="dim">규칙을 불러오는 중… 그대로 만들어도 기본 규칙으로 시작해요.</p>
+            <p className="dim">불러오는 중…</p>
           )}
-          <p className="faint" style={{ fontSize: 'var(--fs-xs)', marginBottom: 0 }}>
-            {T.home.createHint}
-          </p>
         </Modal>
       )}
     </main>

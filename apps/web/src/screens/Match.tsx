@@ -143,7 +143,7 @@ export function Match({ room, receivedAt }: { room: RoomView; receivedAt: number
         <section className={s.stage}>{body}</section>
         <aside className={s.side}>
           {room.phase !== 'final' && (
-            <div className="card">
+            <div className={`card ${s.scoreCard}`}>
               <div className="card-title">방 점수</div>
               <Scoreboard room={room} />
             </div>

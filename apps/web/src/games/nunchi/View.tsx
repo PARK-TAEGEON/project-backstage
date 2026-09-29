@@ -25,7 +25,7 @@ export function NunchiView({ view, receivedAt, players, meId }: GameViewProps<Vi
   const idle = useRemaining(view.idleRemainingMs, receivedAt);
   const byId = new Map(players.map((p) => [p.id, p]));
   const meLine =
-    view.me === 'pending' ? '채팅창에 숫자를 쳐요!' : view.me === 'success' ? '통과! 이제 구경하세요 😎' : view.me === 'out' ? '탈락… 다음 라운드를 노려요' : '구경 중';
+    view.me === 'pending' ? '' : view.me === 'success' ? '통과! 😎' : view.me === 'out' ? '탈락…' : '구경 중';
 
   return (
     <div className={s.wrap}>

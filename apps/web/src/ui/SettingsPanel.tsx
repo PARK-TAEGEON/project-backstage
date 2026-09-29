@@ -79,9 +79,6 @@ export function SettingsPanel({
       <div className={s.field}>
         <span className="label">{T.settings.gameRounds}</span>
         <Stepper label={T.settings.gameRounds} value={settings.gameRounds} min={GAME_ROUNDS_MIN} max={GAME_ROUNDS_MAX} disabled={dis} onChange={(v) => onChange({ gameRounds: v })} />
-        <span className="faint" style={{ fontSize: 'var(--fs-xs)' }}>
-          {T.settings.gameRoundsHelp}
-        </span>
       </div>
 
       <div className={s.field}>

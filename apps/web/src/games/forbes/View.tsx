@@ -117,7 +117,7 @@ export function ForbesView({ view, receivedAt, players, meId, sendAction }: Game
             })}
         </ul>
         <p className="dim" style={{ textAlign: 'center' }}>
-          {voted ? '지목 완료! ' : canVote ? '한 명을 골라요. 한 번 고르면 못 바꿔요. ' : ''}
+          {voted ? '지목 완료! ' : ''}
           {view.votedCount} / {view.voterCount}명 지목
         </p>
       </div>
