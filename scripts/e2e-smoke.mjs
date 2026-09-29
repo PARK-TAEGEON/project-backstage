@@ -109,7 +109,7 @@ for (let q = 1; q <= 7; q++) {
   if (q === 1) await shot(host, '10-forbes-reveal');
 }
 
-// 6) 쿵쿵따: 4명 → 3라운드. 차례인 사람이 사전 단어로 두 번 잇고, 세 번째는 지어낸 단어로 탈락
+// 6) 쿵쿵따: 4명 → 3라운드. 차례인 사람이 사전 단어로 두 번 잇고, 세 번째는 지어낸 단어 → “없는 단어” 거절 → 시간 초과로 탈락
 await host.getByText('쿵쿵따', { exact: false }).first().waitFor({ timeout: 30_000 });
 const used = new Set();
 let turns = 0;
@@ -141,13 +141,22 @@ while (turns < 40) {
     await shot(p2, '11b-kkt-mobile');
     kktShots += 1;
   }
-  if (fake && kktShots === 1) {
+  if (fake) {
+    // 틀려도 탈락하지 않고 다시 시도할 수 있어야 한다
+    await turnPage.getByTestId('kkt-reject').waitFor({ timeout: 3000 });
+    if (!(await turnPage.getByText('내 차례!').isVisible())) throw new Error('틀린 단어로 차례가 넘어갔어요');
+    if (kktShots === 1) {
+      await shot(turnPage, '11c-kkt-reject');
+      kktShots += 1;
+    }
+  }
+  // 차례가 넘어갈 때까지 대기 (다음 사람 차례, 또는 시간 초과 → 라운드 결과)
+  await turnPage.getByText('내 차례!').waitFor({ state: 'detached', timeout: 12_000 }).catch(() => {});
+  if (fake && kktShots === 2) {
     await host.waitForTimeout(200);
-    await shot(host, '11c-kkt-fail');
+    await shot(host, '11d-kkt-timeout');
     kktShots += 1;
   }
-  // 차례가 넘어갈 때까지 대기 (다음 사람 차례 또는 라운드 결과)
-  await turnPage.getByText('내 차례!').waitFor({ state: 'detached', timeout: 6000 }).catch(() => {});
 }
 log('쿵쿵따 제출 수', turns);
 if (turns < 9) throw new Error('쿵쿵따가 예상보다 빨리 끝났어요');

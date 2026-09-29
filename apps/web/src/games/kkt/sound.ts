@@ -1,5 +1,6 @@
 /**
- * 쿵쿵따 사운드 실험 (KKT 스펙 “사운드 실험”) — 음원 파일 없이 Web Audio로 합성한다 (저작권 문제 없음).
+ * 쿵쿵따 사운드 실험 — 차례 시간이 줄면 “쿵·쿵·따” 박자도 같이 빨라진다.
+ * (KKT 스펙 “사운드 실험”) — 음원 파일 없이 Web Audio로 합성한다 (저작권 문제 없음).
  * 다른 게임에는 쓰지 않는다.
  *
  * - 브라우저는 사용자가 화면을 한 번 눌러야 소리를 낼 수 있다 → 앱 어디든 첫 클릭·키 입력 때 오디오를 켠다
@@ -173,6 +174,15 @@ export function playPass() {
   const at = ac.currentTime;
   tone(ac, at, { type: 'square', from: 880, to: 1320, dur: 0.12, gain: 0.18 });
   tta(ac, at, 0.35);
+}
+
+/** 틀린 단어 “삑” (다시 시도) */
+export function playReject() {
+  if (muted) return;
+  const ac = audio();
+  if (!ac) return;
+  const at = ac.currentTime;
+  tone(ac, at, { type: 'square', from: 180, to: 140, dur: 0.18, gain: 0.12 });
 }
 
 /** 탈락 “땡” */

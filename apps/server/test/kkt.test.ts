@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { defaultGameSettings } from '@backstage/shared';
 import { FakeClock } from '../src/clock.js';
 import type { GameContext, GameOutcome, GameInstance } from '../src/games/types.js';
-import { createKkt, KKT_RULES, KKT_TIMING, kkt, type KktView } from '../src/games/kkt/index.js';
+import { createKkt, KKT_RULES, KKT_TIMING, kkt, kktTurnMs, type KktView } from '../src/games/kkt/index.js';
 import { buildDictionary, loadDictionaryFile } from '../src/games/kkt/dictionary.js';
 import { allowedStarts, dueum, isThreeSyllables } from '../src/games/kkt/hangul.js';
 
@@ -92,13 +92,12 @@ describe('쿵쿵따 사전 파일', () => {
   });
 });
 
-describe('쿵쿵따 게임 (v0.3)', () => {
-  it('기본 규칙: 3~8명, 전용 입력칸, 방 설정 없음, 차례 5초', () => {
+describe('쿵쿵따 게임 (v0.4)', () => {
+  it('기본 규칙: 3~8명, 전용 입력칸, 방 설정 없음', () => {
     expect(kkt.meta.minPlayers).toBe(3);
     expect(kkt.meta.inputs).toEqual(['text']);
     expect(kkt.meta.settings).toEqual([]);
     expect(kkt.meta.ai).toBe('none');
-    expect(KKT_RULES.turnMs).toBe(5000);
   });
 
   it('정상 연결: 끝 글자로 이어 가고 차례가 넘어간다', () => {
@@ -125,53 +124,111 @@ describe('쿵쿵따 게임 (v0.3)', () => {
     expect(h.v().required).toEqual(['가']);
   });
 
-  it('실패 사유별 즉시 탈락: 세 글자 아님 / 첫 글자 불일치 / 사전에 없음 / 이미 나온 단어', () => {
-    const cases: [string, string][] = [
-      ['다람', 'length'],
-      ['쥐구멍', 'start'],
-      ['?', 'length'],
-    ];
-    for (const [word, reason] of cases) {
-      const h = started();
-      const start = h.v().startSyllable;
-      const w = word === '?' ? `${start}쀍쀍쀍` : word;
-      if (reason === 'start' && w[0] === start) continue;
-      const who = h.v().current!;
-      h.submit(w);
-      expect(h.v().eliminated).toEqual([{ id: who, reason, word: w }]);
-      expect(h.v().phase).toBe('round_result');
-    }
+  it('틀린 단어는 탈락이 아니라 거절 → 시간 안에 다시 시도해서 통과할 수 있다', () => {
     const h = started();
     const start = h.v().startSyllable;
     const who = h.v().current!;
-    h.submit(`${start}쀍쀍`);
-    expect(h.v().eliminated[0]).toMatchObject({ id: who, reason: 'not_in_dict' });
+    const cases: [string, string][] = [
+      ['다람', 'length'],
+      [`${start}쀍쀍쀍`, 'length'],
+      [`${start}쀍쀍`, 'not_in_dict'],
+    ];
+    for (const [w, reason] of cases) {
+      h.submit(w, KKT_RULES.retryGapMs);
+      expect(h.v().eliminated).toHaveLength(0);
+      expect(h.v().phase).toBe('turn');
+      expect(h.v().current).toBe(who);
+      expect(h.v().rejected).toEqual({ id: who, reason, word: w });
+    }
+    expect(h.v().rejectCount).toBe(3);
+    h.submit(WORDS.find((x) => x[0] === start)!, KKT_RULES.retryGapMs);
+    expect(h.v().chain).toHaveLength(1);
+    expect(h.v().current).not.toBe(who);
+    expect(h.v().rejected).toBeUndefined();
+    expect(h.v().rejectCount).toBe(0);
   });
 
-  it('이미 나온 단어는 경기 전체에서 금지', () => {
-    const dict = () => buildDictionary([['가나가', ''], ['가다가', '']], 't');
+  it('첫 글자 불일치·이미 나온 단어도 거절 후 재시도', () => {
+    const dict = () => buildDictionary([['가나가', ''], ['가다가', ''], ['나라말', '']], 't');
     const h = harness(['a', 'b', 'c'], { dict });
     h.inst.start();
     h.clock.advance(KKT_TIMING.roundIntroMs);
     h.submit('가나가');
     const who = h.v().current!;
-    h.submit('가나가');
-    expect(h.v().eliminated[0]).toMatchObject({ id: who, reason: 'used' });
+    h.submit('나라말');
+    expect(h.v().rejected).toMatchObject({ id: who, reason: 'start' });
+    h.submit('가나가', KKT_RULES.retryGapMs);
+    expect(h.v().rejected).toMatchObject({ id: who, reason: 'used' });
+    h.submit('가다가', KKT_RULES.retryGapMs);
+    expect(h.v().chain.map((c) => c.word)).toEqual(['가나가', '가다가']);
   });
 
-  it('5초 경계: 4999ms 접수는 유효, 5000ms는 무효 → 시간 초과 탈락', () => {
+  it('연타 방지: 같은 사람의 제출은 0.3초 안에 다시 받지 않는다', () => {
+    const h = started();
+    const start = h.v().startSyllable;
+    h.submit('다람', 100);
+    h.submit(WORDS.find((x) => x[0] === start)!, KKT_RULES.retryGapMs - 1);
+    expect(h.v().chain).toHaveLength(0);
+    h.submit(WORDS.find((x) => x[0] === start)!, 1);
+    expect(h.v().chain).toHaveLength(1);
+  });
+
+  it('연타 방지는 한 차례 안에서만: 앞 차례 직후 내 차례가 다시 와도 바로 제출된다', () => {
+    const words = ['가나가', '가다가', '가라가', '가마가'];
+    const h = harness(['a', 'b', 'c'], { dict: () => buildDictionary(words.map((w) => [w, ''] as [string, string]), 't') });
+    h.inst.start();
+    h.clock.advance(KKT_TIMING.roundIntroMs);
+    const [p0] = h.v().order;
+    for (const w of words) h.submit(w, 10); // p0, p1, p2, p0 — p0의 두 제출 간격 30ms
+    expect(h.v().chain.map((c) => c.word)).toEqual(words);
+    expect(h.v().chain[3]!.by).toBe(p0);
+  });
+
+  it('차례 시간: 10초에서 시작해 단어마다 0.25초씩 줄고 최소 3초', () => {
+    expect(kktTurnMs(0)).toBe(10_000);
+    expect(kktTurnMs(4)).toBe(9000);
+    expect(kktTurnMs(28)).toBe(3000);
+    expect(kktTurnMs(100)).toBe(3000);
+    const h = started();
+    expect(h.v().turnMs).toBe(10_000);
+    h.submit(WORDS.find((x) => x[0] === h.v().startSyllable)!);
+    expect(h.v().turnMs).toBe(9750);
+    expect(h.v().turnRemainingMs).toBe(9750);
+  });
+
+  it('여러 번 틀려도 시간 초과 타이머는 그대로, 차례 시간은 라운드가 바뀌어도 이어서 줄어든다', () => {
+    const words = ['가나가', '가다가', '가라가', '가마가', '가바가'];
+    const h = harness(['a', 'b', 'c'], { dict: () => buildDictionary(words.map((w) => [w, ''] as [string, string]), 't') });
+    h.inst.start();
+    h.clock.advance(KKT_TIMING.roundIntroMs);
+    h.submit('가나가', 10);
+    h.submit('가다가', 10);
+    const who = h.v().current!;
+    const t = h.v().turnMs;
+    expect(t).toBe(kktTurnMs(2));
+    for (let i = 0; i < 5; i++) h.submit('없다요', KKT_RULES.retryGapMs);
+    expect(h.v().rejectCount).toBe(5);
+    h.clock.advance(t - 5 * KKT_RULES.retryGapMs); // 차례 시작부터 정확히 t
+    expect(h.v().eliminated[0]).toMatchObject({ id: who, reason: 'timeout' });
+    h.clock.advance(KKT_TIMING.roundResultMs + KKT_TIMING.roundIntroMs);
+    expect(h.v().round).toBe(2);
+    expect(h.v().turnMs).toBe(kktTurnMs(2)); // 초기화되지 않음
+  });
+
+  it('경계: 차례 시간 −1ms 접수는 유효, 차례 시간이 되면 시간 초과 탈락 (마지막 틀린 시도 기록)', () => {
     const ok = started();
     const w = WORDS.find((x) => x[0] === ok.v().startSyllable)!;
-    ok.submit(w, KKT_RULES.turnMs - 1);
+    ok.submit(w, KKT_RULES.turnStartMs - 1);
     expect(ok.v().eliminated).toHaveLength(0);
     expect(ok.v().chain).toHaveLength(1);
 
     const late = started();
     const who = late.v().current!;
     const w2 = WORDS.find((x) => x[0] === late.v().startSyllable)!;
-    late.clock.advance(KKT_RULES.turnMs); // 타이머가 먼저 울려 탈락
+    late.submit('다람', 100);
+    late.clock.advance(KKT_RULES.turnStartMs - 100); // 타이머가 먼저 울려 탈락
     late.inst.onAction(who, { type: 'word', word: w2 }, late.clock.now());
-    expect(late.v().eliminated).toEqual([{ id: who, reason: 'timeout', word: undefined }]);
+    expect(late.v().eliminated).toEqual([{ id: who, reason: 'timeout', word: '다람' }]);
     expect(late.v().chain).toHaveLength(0);
   });
 
@@ -188,13 +245,13 @@ describe('쿵쿵따 게임 (v0.3)', () => {
     const h = started(['a', 'b', 'c']);
     const order = [...h.v().order];
     const first = order[0]!;
-    h.clock.advance(KKT_RULES.turnMs); // 첫 사람 시간 초과
+    h.clock.advance(KKT_RULES.turnStartMs); // 첫 사람 시간 초과
     expect(h.v().phase).toBe('round_result');
     expect(h.v().order).toEqual(order.slice(1));
     h.clock.advance(KKT_TIMING.roundResultMs + KKT_TIMING.roundIntroMs);
     expect(h.v().round).toBe(2);
     expect(h.v().current).toBe(order[1]);
-    h.clock.advance(KKT_RULES.turnMs); // 두 번째 사람도 시간 초과 → 1명 남음
+    h.clock.advance(KKT_RULES.turnStartMs); // 두 번째 사람도 시간 초과 → 1명 남음
     expect(h.outcome).not.toBeNull();
     expect(h.outcome!.ranking).toEqual([[order[2]], [order[1]], [first]]);
     expect(h.outcome!.aborted).toBeFalsy();

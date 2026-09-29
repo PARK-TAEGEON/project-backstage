@@ -23,6 +23,10 @@
   line-height: 1;
   color: var(--c-bad);
 }
+.reject {
+  color: var(--c-bad);
+  font-weight: 700;
+}
 .failLine {
   font-weight: 700;
 }

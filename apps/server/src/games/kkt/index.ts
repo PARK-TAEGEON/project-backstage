@@ -1,6 +1,8 @@
 /**
- * 쿵쿵따 — docs/context/catalog/games/KKT.md (v0.3) 구현.
- * 순서대로 **세 글자 단어**를 앞 단어의 끝 글자로 잇는다. 차례당 5초, 실패하면 바로 탈락.
+ * 쿵쿵따 — docs/context/catalog/games/KKT.md (v0.4) 구현.
+ * 순서대로 **세 글자 단어**를 앞 단어의 끝 글자로 잇는다.
+ * 틀린 단어는 “없는 단어예요” 하고 **시간 안에 다시 시도**할 수 있다. 시간 안에 못 대면 탈락 (DEC-17).
+ * 차례 시간은 10초에서 시작해 단어가 이어질수록 줄어든다 (최소 3초).
  * 한 명이 탈락할 때마다 한 라운드가 끝나고, 한 명만 남으면 경기 종료 (N명이면 N−1라운드).
  * 단어는 전용 입력칸(game:action)으로 받고, 채팅은 판정하지 않는다 → 기다리는 사람은 채팅으로 방해할 수 있다.
  * 판정은 사전 데이터로 서버가 한다 (AI 없음). 게임 규칙은 방에서 바꿀 수 없다 (DEC-15).
@@ -13,8 +15,8 @@ import { allowedStarts, isThreeSyllables, normalizeSubmission } from './hangul.j
 export const KKT_META: GameMeta = {
   id: 'kkt',
   name: '쿵쿵따',
-  specVersion: '0.3',
-  tagline: '세 글자 단어 잇기! 5초 안에 못 대면 탈락!',
+  specVersion: '0.4',
+  tagline: '세 글자 단어 잇기! 갈수록 빨라져요, 시간 안에 못 대면 탈락!',
   mode: 'individual',
   relationship: 'both',
   length: 'short',
@@ -27,8 +29,16 @@ export const KKT_META: GameMeta = {
   settings: [],
 };
 
-/** 고정 규칙 (DEC-05, DEC-15) */
-export const KKT_RULES = { turnMs: 5000 };
+/**
+ * 고정 규칙 (DEC-17, DEC-15)
+ * - 차례 시간 = max(최소, 시작 − 줄어드는 폭 × 이번 경기에서 이어진 단어 수)
+ * - 같은 사람의 제출은 retryGapMs 안에 다시 받지 않는다 (연타 방지)
+ */
+export const KKT_RULES = { turnStartMs: 10_000, turnMinMs: 3000, turnStepMs: 250, retryGapMs: 300 };
+
+export function kktTurnMs(wordsSoFar: number): number {
+  return Math.max(KKT_RULES.turnMinMs, KKT_RULES.turnStartMs - KKT_RULES.turnStepMs * wordsSoFar);
+}
 export const KKT_TIMING = { roundIntroMs: 2500, roundResultMs: 3000 };
 
 export type KktFailReason = 'timeout' | 'length' | 'start' | 'not_in_dict' | 'used' | 'left';
@@ -66,6 +76,10 @@ export interface KktView {
   order: string[];
   /** 탈락 순서대로 */
   eliminated: { id: string; reason: KktFailReason; word?: string }[];
+  /** 이번 차례에 틀린 마지막 시도 (다시 시도 가능) */
+  rejected?: { id: string; reason: KktFailReason; word: string };
+  /** 이번 차례에 틀린 횟수 */
+  rejectCount: number;
   /** 이번 라운드에 이어진 단어 (최근 12개) */
   chain: KktChainItem[];
   lastFail?: { id: string; reason: KktFailReason; word?: string };
@@ -91,7 +105,11 @@ class KktGame implements GameInstance {
   private startSyllable = '';
   private required: string[] = [];
   private turnStart = 0;
+  private turnMs = KKT_RULES.turnStartMs;
   private phaseEnd = 0;
+  private rejected?: KktView['rejected'];
+  private rejectCount = 0;
+  private lastSubmitAt = new Map<string, number>();
   private turnTimer: number | null = null;
   private phaseTimer: number | null = null;
   private used = new Set<string>();
@@ -202,19 +220,23 @@ class KktGame implements GameInstance {
     this.turnIdx %= this.order.length;
     this.phase = 'turn';
     this.turnStart = this.ctx.now();
+    this.turnMs = kktTurnMs(this.used.size);
+    this.rejected = undefined;
+    this.rejectCount = 0;
+    this.lastSubmitAt.clear(); // 연타 방지는 한 차례 안에서만
     this.scheduleTimeout();
     this.ctx.update();
   }
 
   private scheduleTimeout() {
     this.clearTurnTimer();
-    const wait = this.turnStart + KKT_RULES.turnMs - this.ctx.now();
+    const wait = this.turnStart + this.turnMs - this.ctx.now();
     this.turnTimer = this.ctx.setTimer(Math.max(1, wait), () => {
       this.turnTimer = null;
       if (this.phase !== 'turn') return;
       // 서버 타이머는 ms 단위라 시계보다 조금 일찍 울릴 수 있다 → 아직이면 다시 예약
-      if (this.ctx.now() < this.turnStart + KKT_RULES.turnMs) return this.scheduleTimeout();
-      this.fail(this.order[this.turnIdx]!, 'timeout');
+      if (this.ctx.now() < this.turnStart + this.turnMs) return this.scheduleTimeout();
+      this.fail(this.order[this.turnIdx]!, 'timeout', this.rejected?.word);
     });
   }
 
@@ -232,10 +254,13 @@ class KktGame implements GameInstance {
     if (a.type !== 'word' || typeof a.word !== 'string') return;
     if (this.phase !== 'turn' || this.finished) return;
     if (this.order[this.turnIdx] !== pid) return; // 차례가 아닌 사람의 제출은 무효 (K-3)
-    // 차례 시작 ≤ 접수 < 차례 시작 + 5초 인 첫 제출만 (K-3)
-    if (receivedAt < this.turnStart || receivedAt >= this.turnStart + KKT_RULES.turnMs) return;
+    // 차례 시작 ≤ 접수 < 차례 시작 + 차례 시간 인 제출만 (K-3)
+    if (receivedAt < this.turnStart || receivedAt >= this.turnStart + this.turnMs) return;
+    const last = this.lastSubmitAt.get(pid);
+    if (last !== undefined && receivedAt - last < KKT_RULES.retryGapMs) return; // 연타 방지
     const word = normalizeSubmission(a.word.slice(0, 20));
     if (!word) return;
+    this.lastSubmitAt.set(pid, receivedAt);
     this.judge(pid, word);
   }
 
@@ -246,7 +271,13 @@ class KktGame implements GameInstance {
     else if (!this.required.includes(word[0]!)) reason = 'start';
     else if (!dict.has(word)) reason = 'not_in_dict';
     else if (this.used.has(word)) reason = 'used';
-    if (reason) return this.fail(pid, reason, word);
+    if (reason) {
+      // 틀려도 탈락하지 않는다 — 시간 안에 다시 시도 (DEC-17). 시간은 계속 흐른다.
+      this.rejected = { id: pid, reason, word };
+      this.rejectCount += 1;
+      this.ctx.update();
+      return;
+    }
 
     this.clearTurnTimer();
     this.used.add(word);
@@ -263,7 +294,7 @@ class KktGame implements GameInstance {
     this.beginTurn();
   }
 
-  /** 실패 = 바로 탈락, 라운드 종료 */
+  /** 탈락(시간 초과·나감), 라운드 종료 */
   private fail(pid: string, reason: KktFailReason, word?: string) {
     if (this.phase !== 'turn' || this.finished) return;
     this.clearTurnTimer();
@@ -272,7 +303,11 @@ class KktGame implements GameInstance {
     this.order.splice(idx, 1);
     this.eliminated.push({ id: pid, reason, word });
     this.lastFail = { id: pid, reason, word };
-    this.ctx.say(`❌ ${this.name(pid)} ${word ? `「${word}」… ` : ''}${KKT_FAIL_TEXT[reason]}`);
+    this.ctx.say(
+      reason === 'timeout'
+        ? `⏰ ${this.name(pid)} 시간 초과!${word ? ` (마지막 시도 「${word}」)` : ''}`
+        : `❌ ${this.name(pid)} ${KKT_FAIL_TEXT[reason]}`,
+    );
     // 새 라운드는 탈락자 다음 사람부터
     this.turnIdx = this.order.length ? idx % this.order.length : 0;
     if (this.order.length <= 1) {
@@ -338,13 +373,15 @@ class KktGame implements GameInstance {
       startSyllable: this.startSyllable,
       current: this.phase === 'turn' || this.phase === 'intro' ? this.order[this.turnIdx] : undefined,
       required: this.required,
-      turnMs: KKT_RULES.turnMs,
-      turnRemainingMs: this.phase === 'turn' ? Math.max(0, this.turnStart + KKT_RULES.turnMs - now) : undefined,
+      turnMs: this.phase === 'turn' ? this.turnMs : kktTurnMs(this.used.size),
+      turnRemainingMs: this.phase === 'turn' ? Math.max(0, this.turnStart + this.turnMs - now) : undefined,
       phaseRemainingMs: this.phase === 'intro' || this.phase === 'round_result' ? Math.max(0, this.phaseEnd - now) : undefined,
       order: this.order,
       eliminated: this.eliminated,
       chain: this.chain,
       lastFail: this.lastFail,
+      rejected: this.phase === 'turn' ? this.rejected : undefined,
+      rejectCount: this.phase === 'turn' ? this.rejectCount : 0,
       me: this.order.includes(pid) ? 'alive' : out ? 'out' : 'spectator',
       usedCount: this.used.size,
       dict: { version: this.dict?.version ?? '', credit: DICT_CREDIT },

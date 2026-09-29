@@ -3,7 +3,7 @@ import { useRemaining } from '../../state/RoomProvider';
 import { Avatar } from '../../ui/Avatar';
 import { Marquee, TimerBar } from '../../ui/Marquee';
 import type { GameViewProps } from '../registry';
-import { BARS_PER_TURN, isMuted, onMutedChange, playBomb, playFail, playFanfare, playPass, playTurnBeat, setMuted, stopScheduled } from './sound';
+import { BARS_PER_TURN, isMuted, onMutedChange, playBomb, playFail, playFanfare, playPass, playReject, playTurnBeat, setMuted, stopScheduled } from './sound';
 import s from './View.module.css';
 
 type FailReason = 'timeout' | 'length' | 'start' | 'not_in_dict' | 'used' | 'left';
@@ -22,6 +22,8 @@ interface View {
   eliminated: { id: string; reason: FailReason; word?: string }[];
   chain: { word: string; by: string; def: string; hanbang: boolean }[];
   lastFail?: { id: string; reason: FailReason; word?: string };
+  rejected?: { id: string; reason: FailReason; word: string };
+  rejectCount: number;
   me: 'alive' | 'out' | 'spectator';
   usedCount: number;
   dict: { version: string; credit: string };
@@ -31,7 +33,7 @@ const FAIL_TEXT: Record<FailReason, string> = {
   timeout: '시간 초과',
   length: '세 글자가 아니에요',
   start: '첫 글자가 안 맞아요',
-  not_in_dict: '사전에 없는 단어예요',
+  not_in_dict: '없는 단어예요',
   used: '이미 나온 단어예요',
   left: '나감',
 };
@@ -42,6 +44,8 @@ export function KktView({ view, receivedAt, players, meId, sendAction }: GameVie
   const remaining = useRemaining(view.turnRemainingMs, receivedAt, 50);
   const myTurn = view.phase === 'turn' && view.current === meId;
   const turnKey = `${view.round}:${view.usedCount}:${view.current ?? ''}:${view.phase}`;
+  /** 제출 하나에 대한 서버 답(통과·거절)을 받기 전까지 다시 못 보내게 잠그는 키 */
+  const attemptKey = `${turnKey}:${view.rejectCount}`;
 
   const [word, setWord] = useState('');
   const [sentKey, setSentKey] = useState<string | null>(null);
@@ -52,20 +56,25 @@ export function KktView({ view, receivedAt, players, meId, sendAction }: GameVie
   // 내가 낸 차례가 지나가면 입력칸 비우기. 내 차례면 바로 입력할 수 있게 포커스
   // (모바일은 포커스만으로 키보드가 안 뜰 수 있어서, 생존자에게는 입력칸을 계속 보여 준다 → 키보드를 켜 둔 채 기다릴 수 있음)
   useEffect(() => {
-    if (sentKey !== null && sentKey !== turnKey) {
-      setWord('');
-      setSentKey(null);
-    }
+    // 서버가 답했다: 통과면 차례가 넘어갔고, 내 단어가 거절됐으면 다시 시도할 수 있게 비우고 포커스
+    if (sentKey !== null || (view.rejected?.id === meId && myTurn)) setWord('');
+    setSentKey(null);
     if (myTurn) inputRef.current?.focus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turnKey, myTurn]);
+  }, [attemptKey, myTurn]);
 
   // ── 사운드 실험: 차례마다 쿵·쿵·따 비트, 통과/탈락/한방/팡파르 효과음 ──
   useEffect(() => {
-    if (view.phase === 'turn' && view.turnRemainingMs !== undefined) playTurnBeat(view.turnMs, view.turnRemainingMs);
-    else stopScheduled();
+    // 음소거를 차례 도중에 풀어도 남은 박자부터 다시 울린다
+    if (!muted && view.phase === 'turn' && view.turnRemainingMs !== undefined) {
+      playTurnBeat(view.turnMs, Math.max(0, view.turnRemainingMs - (performance.now() - receivedAt)));
+    } else stopScheduled();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turnKey]);
+  }, [turnKey, muted]);
+  useEffect(() => {
+    if (view.rejectCount > 0) playReject();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attemptKey]);
   const prev = useRef({ used: view.usedCount, out: view.eliminated.length, phase: view.phase });
   useEffect(() => {
     const p = prev.current;
@@ -80,10 +89,17 @@ export function KktView({ view, receivedAt, players, meId, sendAction }: GameVie
   }, [view.usedCount, view.eliminated.length, view.phase, view.chain]);
   useEffect(() => () => stopScheduled(), []);
 
+  // 서버가 제출을 조용히 무시한 경우(연타 방지 등)에도 입력이 잠긴 채 남지 않게 잠시 뒤 풀어 준다
+  useEffect(() => {
+    if (sentKey === null) return;
+    const id = setTimeout(() => setSentKey(null), 1000);
+    return () => clearTimeout(id);
+  }, [sentKey]);
+
   const submit = () => {
     const w = word.trim();
-    if (!myTurn || !w || sentKey === turnKey) return;
-    setSentKey(turnKey);
+    if (!myTurn || !w || sentKey === attemptKey) return;
+    setSentKey(attemptKey);
     sendAction({ type: 'word', word: w });
   };
 
@@ -118,7 +134,13 @@ export function KktView({ view, receivedAt, players, meId, sendAction }: GameVie
             <span key={turnKey} className={`${s.need} display pop-in`} data-testid="kkt-need">
               {needLabel}
             </span>
-            <span className="faint">(으)로 시작하는 세 글자</span>
+            {view.rejected ? (
+              <span key={view.rejectCount} className={`${s.reject} pop-in`} data-testid="kkt-reject">
+                ✖ {view.rejected.id === meId ? '' : `${nick(view.rejected.id)} `}「{view.rejected.word}」 {FAIL_TEXT[view.rejected.reason]}! 다시!
+              </span>
+            ) : (
+              <span className="faint">(으)로 시작하는 세 글자 · 이번 차례 {view.turnMs / 1000}초</span>
+            )}
           </>
         ) : (
           view.lastFail && (
@@ -162,12 +184,12 @@ export function KktView({ view, receivedAt, players, meId, sendAction }: GameVie
             maxLength={10}
             placeholder={myTurn ? `${view.required[0]}○○` : '내 차례를 기다리는 중…'}
             onChange={(e) => setWord(e.target.value)}
-            readOnly={sentKey === turnKey}
+            readOnly={sentKey === attemptKey}
             autoComplete="off"
             aria-label="세 글자 단어"
             data-testid="kkt-input"
           />
-          <button className="btn btn-marquee" disabled={!myTurn || sentKey === turnKey || !word.trim()} data-testid="kkt-submit">
+          <button className="btn btn-marquee" disabled={!myTurn || sentKey === attemptKey || !word.trim()} data-testid="kkt-submit">
             따!
           </button>
         </form>
