@@ -14,6 +14,8 @@
 - 01-CONSTITUTION.md, 03-LOBBY-TAXONOMY.md, 04-CATALOG-POLICY.md, 05-QA-PIPELINE.md (검수 기준)
 - catalog/INDEX.md (배치 구성)
 - catalog/games/ 의 WORD.md, BAN.md, KKT.md, WHO.md, NUNCHI.md (검수 대상, BATCH-01)
+- 09-ENGINE-RULES.md (공통 판정·진행 규약 — 게임 스펙이 따르는 기본 규칙)
+- (재검토일 때) reviews/ 의 이전 ASTRA 리뷰 — 이전 지적이 반영됐는지 먼저 확인하고, 항목별로 해결 / 부분 해결 / 미해결을 표시해라
 
 [지켜야 할 것]
 1. [확정] 표시 항목은 사용자 결정이다. 바꾸자고 제안하지 마라. 확정 항목 때문에 규칙이 성립하지 않는 경우에만 "확정 사항 충돌"로 표시하고, 무엇이 깨지는지만 설명해라.

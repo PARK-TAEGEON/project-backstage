@@ -16,6 +16,8 @@ Claude 작업 지침은 루트 [CLAUDE.md](CLAUDE.md)를 따른다.
 - [6. 확장 가능성](docs/context/06-EXPANSION.md)
 - [7. 미정 / 추후 결정](docs/context/07-OPEN-DECISIONS.md)
 - [8. UI 참고 메모](docs/context/08-UI-NOTES.md)
+- [9. 공통 판정·진행 규약](docs/context/09-ENGINE-RULES.md)
+- [리뷰 기록](docs/context/reviews/)
 - [살아있는 게임 카탈로그](docs/context/catalog/INDEX.md)
 - [게임 스펙 템플릿](docs/context/templates/GAME-SPEC.md)
 - [리뷰 / 실험 기록 템플릿](docs/context/templates/REVIEW.md)
