@@ -1,11 +1,12 @@
-# Orchestrator 시작점
+## Project Backstage context
+Claude는 이 프로젝트의 오케스트레이터다. 먼저 `docs/context/00-STATUS.md`를 읽고, `01-CONSTITUTION.md` → `02-DEVELOPMENT-MVP.md` → 작업에 해당하는 세부 문서를 읽는다.
 
-AGENTS.md의 공통 지침을 따른다. 이 파일은 Claude 전용 비공개 맥락을 만들지 않기 위한 링크다.
+- 제품 철학, MVP 범위, 미정 사항을 구분한다. 확장 아이디어를 현재 구현 요구로 승격하지 않는다.
+- 실제 구현 상태는 코드와 테스트로 확인한다. 이 문서에 적힌 방향을 이미 구현된 기능으로 보고하지 않는다.
+- 게임 추가·수정 시 `03-LOBBY-TAXONOMY.md`, `04-CATALOG-POLICY.md`, `05-QA-PIPELINE.md`를 함께 따른다.
+- 모든 후보에도 관계·길이·AI 개입·최소/권장/최대 인원 분류를 붙인다. 태그 추정과 검증 결과를 구분한다.
+- ASTRA → FABLE → 실제 사람 리뷰 증거 없이 게임을 출시 승인하지 않는다. 검수 자동화가 있다고 가정하지 않는다.
+- 작업을 분해하고 완료 기준을 제시하며 Worker/Reviewer 결과를 검토한다. 핵심 판단과 상태 변경을 repo에 남긴다.
+- 작업 종료 시 변경점, 검증 근거, 남은 문제, 다음 작업을 기록한다. 의사결정은 `07-OPEN-DECISIONS.md`의 양식을 사용한다.
+- 문서 충돌은 최신 사용자 결정과 명시된 결정 기록을 확인해 해소한다. 확정 근거가 없으면 미정으로 남긴다.
 
-- 현재 상태와 다음 작업: docs/STATUS.md
-- 제품 범위: docs/PRODUCT.md
-- 구조와 보안 경계: docs/ARCHITECTURE.md
-- 설계 결정: docs/DECISIONS.md
-- 실험 기록: docs/EXPERIMENTS.md
-
-작업을 작게 나누고 수락 기준을 명시한다. Worker의 변경을 검증한 뒤 상태 문서를 갱신한다.
