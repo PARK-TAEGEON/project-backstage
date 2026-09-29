@@ -9,7 +9,7 @@
 | OPEN-04 | min=3을 어떤 포맷부터 검증할 것인가? | 첫 사람 테스트 계획 |
 | OPEN-05 | AI 옵션은 정확 일치인가 허용 상한인가? low/high 호출 기준은? | 편성·AI 구현 전 |
 | OPEN-06 | 실제 스택, 공급자, 모델, 호출 비용/지연 예산은? | 기존 repo 확인 및 구현 전 |
-| ~~OPEN-07~~ | ASTRA/FABLE은 어떤 실행 주체·모델·프롬프트인가? | **DEC-10으로 해소:** BATCH-01은 두 단계 모두 Claude Sonnet 5.5에서 수동 실행, 프롬프트는 templates/REVIEW-PROMPTS.md |
+| ~~OPEN-07~~ | ASTRA/FABLE은 어떤 실행 주체·모델·프롬프트인가? | **DEC-13으로 해소:** ASTRA는 Claude 서브에이전트(치명 문제만), FABLE 선택. 외부 모델 수동 실행(DEC-10)은 선택 경로 |
 | OPEN-08 | 사람 테스트 표본 수, 합격선, 검수 담당자는? | 출시 승인 전 |
 | OPEN-09 | 낯선 사람 입장 방식, 혼합 관계 로비, 분위기 강도 옵션은? | 해당 UX 추가 전 |
 | OPEN-10 | 이탈·재접속·진행 중 인원 감소의 공통 정책은? | **부분 해소(DEC-12, proposed):** 09-ENGINE-RULES 4절. 이탈 확정 시간 등 실제 값은 구현·테스트 때 확정 |
@@ -146,3 +146,12 @@
 - 영향 문서 / 게임 버전: 09-ENGINE-RULES, catalog/games 5개, catalog/INDEX, OPEN-10.
 - 재검수 조건: ASTRA 2차 검토에서 반영이 부족하다고 판정될 때. 사용자가 위 해석 중 하나를 바꿀 때.
 - 대체한 결정 ID: 없음
+
+- DEC-13 / 2026-09-29 / accepted
+- 질문 및 결정: QA 절차를 줄인다. ASTRA는 **치명 문제(종료 불가·비밀 누출·참여 불가)만** 보고, 치명 0건이면 통과한다. 비치명 지적은 재리뷰 없이 `catalog/IMPLEMENTATION-BACKLOG.md`로 넘긴다. 치명 수정 후에는 그 항목만 확인한다. FABLE은 선택. ASTRA는 Claude가 이 대화를 모르는 별도 리뷰어(서브에이전트)로 실행한다.
+- 근거: 사용자 결정 (2026-09-29 대화) — 매번 외부 모델로 리뷰·재리뷰하는 부담.
+- 대안과 이유: 기존 ASTRA → FABLE 전체 재리뷰 반복 — 사람 테스트 전에 종이 스펙만 계속 다듬게 됨.
+- 영향 문서: 05-QA-PIPELINE, 04-CATALOG-POLICY, CLAUDE.md, README, catalog/IMPLEMENTATION-BACKLOG, reviews/…-r2. DEC-10(외부 Sonnet 수동 실행)은 선택 경로로 남는다.
+- 결과: BATCH-01 5개 모두 astra_passed (WORD는 2차에서 나온 W-6 수정 후).
+- 재검수 조건: 사람 테스트에서 스펙 단계가 잡았어야 할 치명 문제가 반복해서 나올 때.
+- 대체한 결정 ID: DEC-10의 기본 실행 방식 (외부 수동 → 서브에이전트)

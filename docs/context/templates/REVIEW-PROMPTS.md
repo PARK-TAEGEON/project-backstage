@@ -1,6 +1,6 @@
 # 리뷰 프롬프트 (ASTRA / FABLE)
 
-실행 모델: BATCH-01은 두 단계 모두 Claude Sonnet 5.5 (DEC-10). ASTRA·FABLE은 모델 이름이 아니라 단계 이름이다.
+**기본 실행 방식은 DEC-13:** ASTRA는 Claude가 별도 리뷰어(서브에이전트)로 **치명 문제만** 확인한다. 아래 프롬프트는 외부 모델로 직접 돌리고 싶을 때 쓰는 선택 경로다. 이때도 통과 기준은 05-QA-PIPELINE의 “치명 0건”이다. ASTRA·FABLE은 모델 이름이 아니라 단계 이름이다.
 
 리뷰를 맡길 AI에 `project-backstage-context` 패키지(또는 docs/context 폴더)를 첨부하고 아래 프롬프트를 붙여 넣는다. ASTRA를 먼저 돌리고, FABLE에는 ASTRA 결과를 함께 준다. 결과는 `templates/REVIEW.md` 형식으로 저장하고 게임 스펙의 “검수 / 변경”에 링크한다.
 

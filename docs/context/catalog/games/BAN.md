@@ -5,7 +5,7 @@
 ## 식별 / 분류
 - id / name / version / batch_id: BAN / 금지어 / 0.4 / BATCH-01 (WORD와 엔진 공유)
 - 계보: WORD(단어 말하기)의 거울판 — WORD는 자기 단어를 말해야 하고, BAN은 자기 단어를 말하면 안 된다.
-- status: candidate
+- status: astra_passed
 - implementation_status: not_started
 - platform / owner / updated_at: web / 사용자 / 2026-09-29
 - mode: individual (개인전) [확정]
@@ -126,7 +126,7 @@
 - **재접속:** 같은 라운드에 돌아오면 그룹·점수·입막힘·챌린지 남은 기한을 복원. 라운드 종료를 되돌리지 않는다.
 
 ## 검수 / 변경
-- ASTRA: [ASTRA 1차](../../reviews/2026-09-29-ASTRA-BATCH-01.md) — 0.3 hold → 0.4에서 지적 반영, **재검토 대기** / FABLE: 없음 / Human: 없음
+- ASTRA: [ASTRA 1차](../../reviews/2026-09-29-ASTRA-BATCH-01.md) — 0.3 hold → 0.4에서 지적 반영, [ASTRA 2차](../../reviews/2026-09-29-ASTRA-BATCH-01-r2.md) — v0.4 **치명 0건, pass** / FABLE: 없음 / Human: 없음
 - next_action: WORD와 함께 ASTRA 검토
 - changelog:
   - 2026-09-29 / 0.1 / 최초 작성 (DEC-04)

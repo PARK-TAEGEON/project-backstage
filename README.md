@@ -12,7 +12,7 @@ Claude 작업 지침은 루트 [CLAUDE.md](CLAUDE.md)를 따른다.
 - [2. 개발 규칙 / MVP](docs/context/02-DEVELOPMENT-MVP.md)
 - [3. 로비 / 분류 체계](docs/context/03-LOBBY-TAXONOMY.md)
 - [4. 카탈로그 운영 / 지속 검수](docs/context/04-CATALOG-POLICY.md)
-- [5. ASTRA → FABLE → 사람 QA](docs/context/05-QA-PIPELINE.md)
+- [5. QA — ASTRA(치명 문제) → 사람 테스트](docs/context/05-QA-PIPELINE.md)
 - [6. 확장 가능성](docs/context/06-EXPANSION.md)
 - [7. 미정 / 추후 결정](docs/context/07-OPEN-DECISIONS.md)
 - [8. UI 참고 메모](docs/context/08-UI-NOTES.md)

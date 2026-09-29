@@ -7,7 +7,7 @@ Project Backstage는 **사람들이 함께 놀고 웃는 채팅 기반 소셜 �
 - MVP는 채팅 기반. 플랫폼 전체를 먼저 만들지 않는다.
 - 낯선 사람 / 친구 관계와 짧은 / 중간 / 긴 플레이를 분류한다.
 - 모든 게임은 관계, 길이, AI 개입, 최소/권장/최대 인원을 갖는다. 최소 3명 플레이를 허용한다.
-- 아이디어는 대량 수집할 수 있으나 그대로 채택하지 않는다. ASTRA → FABLE → 실제 사람 리뷰로 걸러낸다.
+- 아이디어는 대량 수집할 수 있으나 그대로 채택하지 않는다. ASTRA(치명 문제) → 실제 사람 테스트로 걸러낸다 (DEC-13).
 - 카탈로그는 추가·삭제·수정을 계속하는 문서다. 원대화의 대량 목록은 승인된 콘텐츠가 아니다.
 - 웹, 아바타/코디, 소셜, Roblox, 포맷 라이브러리는 장기 가능성이다.
 
@@ -18,8 +18,8 @@ Project Backstage는 **사람들이 함께 놀고 웃는 채팅 기반 소셜 �
 | 기술 스택 | 이전 부트스트랩(`7ee494f`): Next.js 16 · TypeScript · Tailwind · Supabase client · AI provider mock. 현재 코드 없음; 재구현 시 결정 |
 | 출시 게임 수 / 첫 배치 | BATCH-01 = WORD(단어 말하기), BAN(금지어), KKT(쿵쿵따), WHO(포브스), NUNCHI(눈치게임) — 5개 구성 완료, 리뷰 대기; 출시 게임 수는 미정 |
 | 카탈로그 후보 | candidate 5개(WORD·BAN·KKT·WHO·NUNCHI), hold 2개(SD·EK), rejected 2개(HR, WHO 0.1 안) |
-| ASTRA / FABLE 실행 연동 | 수동 실행 (Sonnet 5.5, DEC-10). ASTRA 1차 완료: 5개 모두 hold → 반영 후 재검토 대기 |
-| 사람 플레이테스트 | 확인된 기록 없음 |
+| ASTRA / FABLE 실행 연동 | ASTRA는 Claude 서브에이전트로 치명 문제만 확인 (DEC-13). BATCH-01 5개 모두 astra_passed. FABLE 선택 |
+| 사람 플레이테스트 | 확인된 기록 없음 — BATCH-01 5개 대기 |
 | 출시 승인 게임 | 이 패키지에 등록된 항목은 0개 |
 
 ## 출처와 범위
@@ -35,6 +35,5 @@ Project Backstage는 **사람들이 함께 놀고 웃는 채팅 기반 소셜 �
 
 ## 다음 작업
 1. DEC-12(proposed)의 해석 4가지를 사용자가 확인한다.
-2. ASTRA 2차 검토: 같은 프롬프트로 현재 버전(WORD 0.3, BAN 0.4, KKT 0.3, WHO 0.4, NUNCHI 0.2)과 09-ENGINE-RULES를 검토. 1차 리뷰를 함께 주고 반영 여부를 확인하게 한다.
-3. ASTRA 통과 게임부터 FABLE 검토.
-4. 단톡방 수동 테스트 또는 프로토타입으로 사람 테스트.
+2. 사람 테스트: 단톡방 수동 진행(한 사람이 사회자·집계 대행) 또는 프로토타입. 3명 테스트 포함. 기록은 templates/REVIEW.md.
+3. 프로토타입을 만든다면 구현 백로그(catalog/IMPLEMENTATION-BACKLOG.md)와 09-ENGINE-RULES를 기준으로 한다. 이전 부트스트랩(`7ee494f`) 재사용 여부 검토.

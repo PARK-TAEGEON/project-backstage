@@ -4,7 +4,7 @@
 
 ## 식별 / 분류
 - id / name / version / batch_id: NUNCHI / 눈치게임 / 0.2 / BATCH-01
-- status: candidate
+- status: astra_passed
 - implementation_status: not_started
 - platform / owner / updated_at: web / 사용자 / 2026-09-29
 - mode: individual (개인전)
@@ -72,7 +72,7 @@
 - **중복 제출:** 이미 성공·탈락한 사람의 추가 숫자는 무효이고 결과를 바꾸지 않는다.
 
 ## 검수 / 변경
-- ASTRA: [ASTRA 1차](../../reviews/2026-09-29-ASTRA-BATCH-01.md) — 0.1 hold → 0.2에서 지적 반영, **재검토 대기** / FABLE: 없음 / Human: 없음
+- ASTRA: [ASTRA 1차](../../reviews/2026-09-29-ASTRA-BATCH-01.md) — 0.1 hold → 0.2에서 지적 반영, [ASTRA 2차](../../reviews/2026-09-29-ASTRA-BATCH-01-r2.md) — v0.2 **치명 0건, pass** / FABLE: 없음 / Human: 없음
 - next_action: 리뷰 배치에 포함. 동시 기준 값은 사람 테스트에서 비교
 - changelog:
   - 2026-09-29 / 0.1 / 최초 작성 (DEC-09)

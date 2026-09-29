@@ -6,7 +6,7 @@
 
 ## 식별 / 분류
 - id / name / version / batch_id: WHO / 포브스 / 0.4 / BATCH-01
-- status: candidate
+- status: astra_passed
 - implementation_status: not_started
 - platform / owner / updated_at: web / 사용자 / 2026-09-29
 - mode: individual (개인전)
@@ -100,7 +100,7 @@
 - **질문:** 한 판 안에서 같은 질문 반복 없음.
 
 ## 검수 / 변경
-- ASTRA: [ASTRA 1차](../../reviews/2026-09-29-ASTRA-BATCH-01.md) — 0.3 hold → 0.4에서 지적 반영, **재검토 대기** / FABLE: 없음 / Human: 없음
+- ASTRA: [ASTRA 1차](../../reviews/2026-09-29-ASTRA-BATCH-01.md) — 0.3 hold → 0.4에서 지적 반영, [ASTRA 2차](../../reviews/2026-09-29-ASTRA-BATCH-01-r2.md) — v0.4 **치명 0건, pass** / FABLE: 없음 / Human: 없음
 - next_action: 질문 목록 검수 후 리뷰 배치에 포함
 - changelog:
   - 2026-09-29 / 0.1 / “누가 썼을까” 최초 작성 (DEC-06)

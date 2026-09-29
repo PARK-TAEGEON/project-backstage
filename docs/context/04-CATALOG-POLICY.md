@@ -1,7 +1,7 @@
 # 4. 미니게임 카탈로그 운영 / 지속 검수
 
 ## 원칙
-**대량 생성 → 스펙화 → ASTRA → FABLE → 실제 사람 리뷰 → 선별 유지.**
+**대량 생성 → 스펙화 → ASTRA(치명 문제) → 실제 사람 테스트 → 선별 유지.** FABLE은 선택 (DEC-13).
 생성은 넓게, 사용 가능한 풀은 엄격하게 관리한다. 사람에게 모든 저품질 후보를 그대로 떠넘기지 않는다.
 
 카탈로그는 [INDEX](catalog/INDEX.md)를 진입점으로 하며 계속 추가·삭제·수정한다. 원대화 전체 아이디어 목록은 백로그 확정도 출시 약속도 아니다.
@@ -14,7 +14,7 @@
 - 한 게임의 상세 스펙을 원본으로 삼고 INDEX는 같은 변경에서 갱신한다. 서로 다른 두 곳에 독립적인 룰을 쓰지 않는다.
 
 ## 상태 규약
-진행 단계: `candidate → astra_passed → fable_passed → human_testing → approved`.
+진행 단계: `candidate → astra_passed → (fable_passed, 선택) → human_testing → approved`. ASTRA 통과 기준은 치명 문제 0건 (05-QA-PIPELINE, DEC-13).
 어느 단계에서든 `hold` 또는 `rejected`로 이동할 수 있다.
 - candidate: 분류·초안이 있는 검수 전 후보.
 - astra_passed / fable_passed: 해당 버전의 검토 기록이 있음. 출시 승인이 아님.
