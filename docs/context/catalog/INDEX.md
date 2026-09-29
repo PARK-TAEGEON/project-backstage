@@ -12,7 +12,7 @@
 | [WORD / 단어 말하기](games/WORD.md) | individual | both | medium | low | 3 | [4,5,6] | 8 | astra_passed / not_started |
 | [BAN / 금지어](games/BAN.md) | individual | both | short | low | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
 | [KKT / 쿵쿵따](games/KKT.md) | individual | both | short | none | 3 | [3,4,5,6] | 8 | astra_passed / not_started |
-| [NUNCHI / 눈치게임](games/NUNCHI.md) | individual | both | short | none | 3 | [4,5,6,7,8] | 8 | astra_passed / prototype |
+| [NUNCHI / 눈치게임](games/NUNCHI.md) | individual | both | short | none | 4 | [4,5,6,7,8] | 8 | astra_passed / prototype |
 | [WHO / 포브스](games/WHO.md) | individual | friends | short | none | 3 | [4,5,6,7,8] | 8 | astra_passed / prototype |
 
 **WORD — 단어 말하기**(DEC-02, 첫 구현 게임). 비밀 단어를 채팅에 끼워 넣어 득점하고, 다른 사람의 단어를 맞히는 챌린지(+3/−3)로 견제한다. 개인전, 라운드제 — 라운드별 집계 후 합계로 최종 순위. 단어는 2음절 이상·띄어쓰기 없는 한 단어. 상세 룰은 [스펙](games/WORD.md)이 원본이다.
@@ -23,9 +23,9 @@
 
 **WHO — 포브스**(DEC-07·08): “IQ가 두 자리일 것 같은 사람은?” 같은 질문에 10초 안에 한 명을 지목하고, 당선자를 “포브스 선정 ‘○○일 것 같은 사람’ 1위”로 발표한다. 7라운드. 점수는 재미용이며 도파민 우선. 투표자 비공개, 질문은 성별·나이·직업 무관한 포괄적 목록, AI 없음. 상세 룰은 [스펙](games/WHO.md)이 원본이다.
 
-**NUNCHI — 눈치게임**(DEC-09): 1부터 숫자를 채팅에 친다. 동시(0.01초)에 겹치면 탈락, 못 친 사람도 탈락. 3라운드, 중앙 3·2·1 카운트다운. 상세 룰은 [스펙](games/NUNCHI.md)이 원본이다.
+**NUNCHI — 눈치게임**(DEC-09): 1부터 숫자를 채팅에 친다. 4명부터. 같은 숫자를 늦게 치거나(동시 0.001초) 끝까지 못 치면 탈락 — 걸리는 순간 라운드 종료, 보통 탈락 1명. 3라운드, 중앙 3·2·1 카운트다운. 상세 룰은 [스펙](games/NUNCHI.md)이 원본이다.
 
-**BATCH-01 (5개) — ASTRA 통과(치명 0건), 사람 테스트 대기.** 리뷰: [1차](../reviews/2026-09-29-ASTRA-BATCH-01.md), [2차](../reviews/2026-09-29-ASTRA-BATCH-01-r2.md). 현재 버전: WORD 0.4, BAN 0.4, KKT 0.3, WHO 0.4, NUNCHI 0.2. 비치명 지적은 [구현 백로그](IMPLEMENTATION-BACKLOG.md). 공통 판정은 [09-ENGINE-RULES](../09-ENGINE-RULES.md). 인원·시간은 검증 전 가설, FABLE·사람 리뷰 기록 없음.
+**BATCH-01 (5개) — ASTRA 통과(치명 0건), 사람 테스트 대기.** 리뷰: [1차](../reviews/2026-09-29-ASTRA-BATCH-01.md), [2차](../reviews/2026-09-29-ASTRA-BATCH-01-r2.md). 현재 버전: WORD 0.4, BAN 0.4, KKT 0.3, WHO 0.4, NUNCHI 0.3. 비치명 지적은 [구현 백로그](IMPLEMENTATION-BACKLOG.md). 공통 판정은 [09-ENGINE-RULES](../09-ENGINE-RULES.md). 인원·시간은 검증 전 가설, FABLE·사람 리뷰 기록 없음.
 
 ## 보류 후보
 분류와 인원은 원대화 제안 또는 이번 이식용 가설이다. 특히 3명 성립 여부는 미검증이다.
@@ -63,6 +63,7 @@ SD 관계·길이·인원은 원대화 카탈로그·인원 예시에 근거하�
 | 2026-09-29 | 초기 이식 | 핵심 후보 2개만 보류로 보존; 저품질 대량 목록과 가짜 승인 상태를 만들지 않음 |
 | 2026-09-29 | SD 0.0→0.1-context | `ai_intervention` high→none, 사전 선정 단어 덱 방식으로 변경 (DEC-01). 검수 기록이 없어 재검수 대상 없음 |
 | 2026-09-29 | WORD 0.1 신규 | SD의 단어 미션 방향을 ‘단어 말하기’로 분리, 첫 구현 게임으로 candidate 등록 (DEC-02) |
+| 2026-09-29 | NUNCHI 0.2→0.3 | 4명부터, 0.001초, 걸리면 라운드 종료 (DEC-15) |
 | 2026-09-29 | NUNCHI·WHO 프로토타입 | 기초 공사와 함께 구현 (DEC-14) |
 | 2026-09-29 | BATCH-01 ASTRA 통과 | QA 절차 간소화(DEC-13) 후 치명 문제만 2차 확인 → 5개 모두 astra_passed (WORD는 W-6 수정 후) |
 | 2026-09-29 | BATCH-01 ASTRA 1차 반영 | 5개 모두 hold → 지적 반영, 버전 상향, 공통 판정 규약(09) 신설 (DEC-12, proposed) |

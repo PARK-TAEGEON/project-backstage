@@ -1,15 +1,21 @@
 /**
- * 눈치게임 — docs/context/catalog/games/NUNCHI.md (v0.2) 구현.
- * 채팅에 1부터 숫자를 친다. 같은 숫자를 동시에(기본 10ms 이내) 치면 모두 탈락, 늦거나 순서가 틀려도 탈락,
- * 끝까지 못 친 마지막 사람도 탈락. 판정은 전부 서버 접수 시각 기준.
+ * 눈치게임 — docs/context/catalog/games/NUNCHI.md (v0.3) 구현.
+ * 채팅에 1부터 숫자를 친다. **누군가 걸리는 순간 그 라운드는 끝난다** (보통 탈락자 1명):
+ * - 같은 숫자를 0.001초 안에 치면 모두 탈락 (동시)
+ * - 같은 숫자를 늦게 친 사람, 순서가 틀린 사람, 카운트다운 중에 친 사람은 혼자 탈락
+ * - 아무도 안 걸리면 마지막까지 못 친 1명이 탈락
+ * 판정은 전부 서버 접수 시각 기준. 게임 규칙(3라운드, 0.001초)은 방에서 바꿀 수 없다 (DEC-15).
  */
 import { rankByScore, type GameMeta } from '@backstage/shared';
 import type { GameContext, GameInstance, ServerGame, ChatDecision } from '../types.js';
 
+/** 고정 규칙. ctx.settings로 덮어쓰는 것은 테스트 코드에서만 쓴다 (방 설정에는 노출하지 않음). */
+export const NUNCHI_RULES = { rounds: 3, simulWindowMs: 1 };
+
 export const NUNCHI_META: GameMeta = {
   id: 'nunchi',
   name: '눈치게임',
-  specVersion: '0.2',
+  specVersion: '0.3',
   tagline: '1부터 숫자를 채팅에! 겹치면 탈락!',
   mode: 'individual',
   relationship: 'both',
@@ -17,23 +23,10 @@ export const NUNCHI_META: GameMeta = {
   ai: 'none',
   inputs: ['chat'],
   platforms: ['web', 'roblox'],
-  minPlayers: 3,
+  minPlayers: 4,
   recommendedPlayers: [4, 5, 6, 7, 8],
   maxPlayers: 8,
-  settings: [
-    { key: 'rounds', label: '게임 안 라운드 수', type: 'int', default: 3, min: 1, max: 5 },
-    {
-      key: 'simulWindowMs',
-      label: '동시 판정 기준',
-      type: 'select',
-      default: '10',
-      options: [
-        { value: '10', label: '0.01초 (기본)' },
-        { value: '300', label: '0.3초 (실험)' },
-        { value: '500', label: '0.5초 (실험)' },
-      ],
-    },
-  ],
+  settings: [],
 };
 
 export const NUNCHI_TIMING = { countdownMs: 3000, idleMs: 10_000, roundResultMs: 3500 };
@@ -87,8 +80,8 @@ class NunchiGame implements GameInstance {
   private finished = false;
 
   constructor(private ctx: GameContext) {
-    this.rounds = Number(ctx.settings.rounds ?? 3);
-    this.windowMs = Number(ctx.settings.simulWindowMs ?? 10);
+    this.rounds = Number(ctx.settings.rounds ?? NUNCHI_RULES.rounds);
+    this.windowMs = Number(ctx.settings.simulWindowMs ?? NUNCHI_RULES.simulWindowMs);
     for (const p of ctx.players) this.outCount.set(p.id, 0);
   }
 
@@ -102,7 +95,7 @@ class NunchiGame implements GameInstance {
 
   private startRound(): void {
     const active = this.ctx.activePlayerIds();
-    if (active.length < 3) return this.finish();
+    if (active.length < NUNCHI_META.minPlayers) return this.finish(); // 4명 미만이면 남은 라운드 없이 종료
     this.round += 1;
     this.phase = 'countdown';
     this.expected = 1;
@@ -129,7 +122,7 @@ class NunchiGame implements GameInstance {
     if (t < this.startAt) {
       this.eliminate(pid, '부정출발');
       this.ctx.say(`🚫 ${this.name(pid)} 부정출발!`);
-      this.checkEnd();
+      this.endRound();
       this.ctx.update();
       return { allow: true };
     }
@@ -190,9 +183,13 @@ class NunchiGame implements GameInstance {
       } else if (item.n < this.expected) {
         this.eliminate(item.pid, `늦은 입력 (${item.n})`);
         this.ctx.say(`🐢 ${this.name(item.pid)} 늦었다! (${item.n})`);
+        this.endRound();
+        return;
       } else {
         this.eliminate(item.pid, `순서 틀림 (${item.n})`);
         this.ctx.say(`❓ ${this.name(item.pid)} 순서 틀림! (${item.n})`);
+        this.endRound();
+        return;
       }
     }
     if (!this.win) this.checkEnd();
@@ -234,6 +231,8 @@ class NunchiGame implements GameInstance {
       for (const id of ids) this.eliminate(id, `동시 입력 (${w.number})`);
       this.claims.push({ number: w.number, ids, collision: true, diffMs });
       this.ctx.say(`💥 ${ids.map((id) => this.name(id)).join(' · ')} 동시! (${(diffMs / 1000).toFixed(3)}초 차)`);
+      this.endRound(); // 걸린 순간 라운드 종료
+      return;
     }
     this.expected = w.number + 1;
     this.resetIdle(this.ctx.now());
@@ -278,16 +277,18 @@ class NunchiGame implements GameInstance {
     }
     this.win = null;
     this.queue = [];
+    // 걸리지 않은 사람은 이번 라운드 통과
+    for (const [id, st] of this.status) if (st === 'pending') this.status.set(id, 'success');
     if (this.idleTimer !== null) {
       this.ctx.clearTimer(this.idleTimer);
       this.idleTimer = null;
     }
     this.phase = 'round_result';
-    const outs = [...this.status].filter(([, s]) => s === 'out').map(([id]) => this.name(id));
+    const outs = [...this.status].filter(([, st]) => st === 'out').map(([id]) => this.name(id));
     this.ctx.say(`📋 ${this.round}라운드 탈락: ${outs.length ? outs.join(', ') : '없음'}`);
     this.ctx.update();
     this.ctx.setTimer(NUNCHI_TIMING.roundResultMs, () => {
-      if (this.round < this.rounds && this.ctx.activePlayerIds().length >= 3) this.startRound();
+      if (this.round < this.rounds && this.ctx.activePlayerIds().length >= NUNCHI_META.minPlayers) this.startRound();
       else this.finish();
     });
   }

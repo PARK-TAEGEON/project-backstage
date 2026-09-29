@@ -53,7 +53,7 @@ npm run build && npm start   # 배포 모드: 서버가 빌드된 웹까지 제�
 ```
 
 - **방 라운드** = 이번 매치에서 할 **게임의 개수**. 게임 안의 라운드(예: 눈치게임 3라운드)는 각 게임 설정이다.
-- 방장이 바꿀 수 있는 것: 최대 인원(3~8), 방 라운드(1~10), 등장 게임, 순서(랜덤/목록), 게임별 설정. 방을 만들 때도, 대기실 안에서도 바꿀 수 있다.
+- 방장이 바꿀 수 있는 것: 최대 인원(3~8), 방 라운드(1~10), 등장 게임, 순서(랜덤/목록). 방을 만들 때(팝업)와 대기실 안에서 바꿀 수 있다. **게임 내부 규칙은 바꿀 수 없다** (DEC-15) — 게임 `meta.settings`는 비워 두고, 규칙 값은 게임 코드의 상수(`NUNCHI_RULES` 등)로 둔다.
 - **점수 합산 (DEC-14):** 게임마다 점수 체계가 달라서, 각 게임의 **최종 순위를 점수로 바꿔** 더한다. N명이면 1위 N점 … 꼴찌 1점, 공동 순위는 높은 점수를 함께 받는다.
 - 인원이 3명 미만이 되면 다음 게임을 시작하지 않고 최종 순위로 간다 (09-ENGINE-RULES 4절).
 - 연결이 끊기면 10초 유예 뒤 이탈 확정. 그 전에 같은 탭에서 다시 연결하면 그대로 이어진다.
@@ -62,7 +62,7 @@ npm run build && npm start   # 배포 모드: 서버가 빌드된 웹까지 제�
 
 1. **스펙 먼저:** `docs/context/catalog/games/<ID>.md`에 스펙을 쓰고 ASTRA(치명 문제)를 통과시킨다 (05-QA-PIPELINE).
 2. **서버:** `apps/server/src/games/<id>/index.ts`
-   - `meta: GameMeta` — 분류(관계·길이·AI·인원), `inputs`, `platforms`, 방장이 바꿀 `settings`, 전광판용 `tagline`.
+   - `meta: GameMeta` — 분류(관계·길이·AI·인원), `inputs`, `platforms`, 전광판용 `tagline`. `settings`는 빈 배열 (게임 규칙은 방에서 바꾸지 않음, DEC-15).
    - `create(ctx) → GameInstance` — `start`, `onAction`, (채팅이 입력이면) `onChat`, `onPlayerLeft`, `view`.
    - 시간은 `ctx.now()`·`ctx.setTimer()`만 쓴다 (테스트에서 가짜 시계로 돌릴 수 있게).
    - **비밀 정보는 `view(playerId)`에서 볼 권한이 있는 사람에게만 넣는다.** 서버는 view를 플레이어별로 따로 보낸다.
@@ -75,7 +75,7 @@ npm run build && npm start   # 배포 모드: 서버가 빌드된 웹까지 제�
 
 | 요청 | 지금 구조 | 확장할 때 |
 |---|---|---|
-| AI 없는 게임 구분 / Roblox | `meta.ai`와 `meta.platforms`. `isRobloxCandidate(meta)` = `ai === 'none'`. `/api/catalog`와 관리자 화면에 “Roblox 후보” 표시 | Roblox 쪽은 게임 규칙(스펙)과 meta를 공유하고 구현은 따로. 웹 QA 승인을 그대로 복사하지 않는다 (06-EXPANSION) |
+| AI 없는 게임 구분 / Roblox | `meta.ai`와 `meta.platforms`. `isRobloxCandidate(meta)` = `ai === 'none'`. “Roblox 후보”는 내부 참고용이라 관리자 화면(/admin)과 `/api/catalog`에만 표시, 플레이어 화면에는 없음 | Roblox 쪽은 게임 규칙(스펙)과 meta를 공유하고 구현은 따로. 웹 QA 승인을 그대로 복사하지 않는다 (06-EXPANSION) |
 | 아바타 | `AvatarConfig`(색·표정·머리 장식) + `Avatar` 컴포넌트 하나로 모든 화면에 그림 | 파츠 추가는 `avatar.ts` 옵션 배열에 항목만 추가. 움직이는 아바타 게임은 `inputs: ['avatar']`로 표시하고 게임 화면에서 캔버스/3D를 쓰면 된다 |
 | 채팅 외 입력 | `inputs: chat / vote / text / avatar`, 게임 전용 입력은 `game:action` | 새 입력 방식도 `onAction`으로 받는다 |
 | 관찰 데이터 | 이벤트 JSONL + `/admin` 통계 (인원별 매치 수, 게임별 완주율·평균 시간·인원 분포, 재플레이율, 이탈 단계) | 저장소를 DB로 바꿀 때는 `EventSink` 구현만 교체 |

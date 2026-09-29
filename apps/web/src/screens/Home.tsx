@@ -6,6 +6,7 @@ import { savedProfile } from '../net/socket';
 import { useRoom } from '../state/RoomProvider';
 import { AvatarEditor } from '../ui/AvatarEditor';
 import { SettingsPanel } from '../ui/SettingsPanel';
+import { Modal } from '../ui/Modal';
 import s from './Home.module.css';
 
 export function Home() {
@@ -15,7 +16,7 @@ export function Home() {
   const [busy, setBusy] = useState(false);
   const [catalog, setCatalog] = useState<GameMeta[]>([]);
   const [settings, setSettings] = useState<RoomSettings | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     fetch('/api/catalog')
@@ -53,7 +54,6 @@ export function Home() {
           <span />
         </div>
         <h1 className={`${s.brand} display`}>{BRAND.name}</h1>
-        <p className="dim">{BRAND.tagline}</p>
         <p className={`pixel blink ${s.press}`} aria-hidden>
           ▶ PRESS START
         </p>
@@ -98,20 +98,48 @@ export function Home() {
           </form>
 
           <div className="card stack">
-            <button className={`btn btn-block ${invited ? '' : 'btn-marquee'}`} disabled={busy || !connected} onClick={() => run(() => create(profile, settings ?? undefined))}>
+            <button
+              className={`btn btn-block ${invited ? '' : 'btn-marquee'}`}
+              disabled={busy || !connected}
+              onClick={() => (nickOk ? setCreating(true) : toast('닉네임을 먼저 정해 주세요.'))}
+            >
               🎬 {T.home.create}
             </button>
-            {settings && (
-              <>
-                <button type="button" className="btn btn-sm btn-ghost" onClick={() => setShowSettings((v) => !v)} aria-expanded={showSettings}>
-                  {showSettings ? '방 규칙 접기' : '⚙️ 방 규칙 미리 정하기'}
-                </button>
-                {showSettings && <SettingsPanel settings={settings} catalog={catalog} editable playerCount={1} onChange={(p) => setSettings({ ...settings, ...p })} />}
-              </>
-            )}
           </div>
         </section>
       </div>
+
+      {creating && (
+        <Modal
+          title={T.home.createTitle}
+          onClose={() => setCreating(false)}
+          footer={
+            <>
+              <button type="button" className="btn btn-ghost" onClick={() => setCreating(false)}>
+                {T.lobby.cancel}
+              </button>
+              <button
+                type="button"
+                className="btn btn-marquee"
+                disabled={busy || !connected}
+                onClick={() => run(() => create(profile, settings ?? undefined))}
+                data-testid="create-confirm"
+              >
+                🎬 {T.home.create}
+              </button>
+            </>
+          }
+        >
+          {settings ? (
+            <SettingsPanel settings={settings} catalog={catalog} editable playerCount={1} onChange={(p) => setSettings({ ...settings, ...p })} />
+          ) : (
+            <p className="dim">규칙을 불러오는 중… 그대로 만들어도 기본 규칙으로 시작해요.</p>
+          )}
+          <p className="faint" style={{ fontSize: 'var(--fs-xs)', marginBottom: 0 }}>
+            {T.home.createHint}
+          </p>
+        </Modal>
+      )}
     </main>
   );
 }

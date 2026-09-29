@@ -37,100 +37,122 @@ function harness(game: ServerGame, ids: string[], settings: Record<string, unkno
   };
 }
 
-describe('눈치게임', () => {
-  const live = () => {
-    const h = harness(nunchi, ['a', 'b', 'c', 'd'], { rounds: 1 });
+describe('눈치게임 (v0.3: 4인 이상, 0.001초, 걸리면 라운드 종료)', () => {
+  const live = (rounds = 1) => {
+    const h = harness(nunchi, ['a', 'b', 'c', 'd'], { rounds });
     h.inst.start();
     h.clock.advance(NUNCHI_TIMING.countdownMs);
     return h;
   };
-  const view = (h: ReturnType<typeof live>, id = 'a') => h.inst.view(id) as NunchiView;
-  const st = (h: ReturnType<typeof live>, id: string) => view(h).players.find((p) => p.id === id)!.status;
-  const say = (h: ReturnType<typeof live>, id: string, n: string, dt = 0) => {
+  type H = ReturnType<typeof live>;
+  const view = (h: H, id = 'a') => h.inst.view(id) as NunchiView;
+  const st = (h: H, id: string) => view(h).players.find((p) => p.id === id)!.status;
+  const say = (h: H, id: string, n: string, dt = 0) => {
     h.clock.advance(dt);
     h.inst.onChat!(id, n, h.clock.now());
   };
 
-  it('카운트다운 중 숫자는 부정출발 탈락', () => {
-    const h = harness(nunchi, ['a', 'b', 'c'], { rounds: 1 });
+  it('기본 규칙: 최소 4명, 0.001초, 3라운드, 방 설정 없음', () => {
+    expect(nunchi.meta.minPlayers).toBe(4);
+    expect(nunchi.meta.settings).toEqual([]);
+    const h = harness(nunchi, ['a', 'b', 'c', 'd'], {});
+    h.inst.start();
+    expect((h.inst.view('a') as NunchiView).windowMs).toBe(1);
+    expect((h.inst.view('a') as NunchiView).rounds).toBe(3);
+  });
+
+  it('카운트다운 중 숫자는 부정출발 → 그 사람만 탈락하고 라운드 종료', () => {
+    const h = harness(nunchi, ['a', 'b', 'c', 'd'], { rounds: 1 });
     h.inst.start();
     h.inst.onChat!('a', '1', h.clock.now() + 100);
-    expect((h.inst.view('a') as NunchiView).me).toBe('out');
+    const v = h.inst.view('b') as NunchiView;
+    expect(v.players.find((p) => p.id === 'a')!.status).toBe('out');
+    expect(v.phase).toBe('round_result');
+    expect(v.players.filter((p) => p.status === 'out')).toHaveLength(1);
   });
 
-  it('10ms 이하 같은 숫자는 동시 탈락, 첫 입력 기준 10ms 초과는 늦은 입력', () => {
+  it('0.001초 이내 같은 숫자는 둘 다 탈락, 라운드 종료', () => {
     const h = live();
     say(h, 'a', '1');
-    say(h, 'b', '1', 8); // 8ms → 동시
-    say(h, 'c', '1', 8); // 16ms → 늦음
-    h.clock.advance(20);
+    say(h, 'b', '1', 0.6);
+    h.clock.advance(5);
     expect(st(h, 'a')).toBe('out');
     expect(st(h, 'b')).toBe('out');
-    expect(st(h, 'c')).toBe('out');
-    expect(view(h).claims[0]).toMatchObject({ number: 1, collision: true, ids: ['a', 'b'] });
-    expect(view(h).expected).toBe(2); // 충돌한 숫자도 소비됨
-  });
-
-  it('정확히 10ms 차이는 동시로 본다', () => {
-    const h = live();
-    say(h, 'a', '1');
-    say(h, 'b', '1', 10);
-    h.clock.advance(20);
-    expect(st(h, 'a')).toBe('out');
-    expect(st(h, 'b')).toBe('out');
-  });
-
-  it('혼자 친 숫자는 성공, 순서 틀린 숫자는 탈락, 마지막 1명 남으면 그 사람 탈락', () => {
-    const h = live();
-    say(h, 'a', '1');
-    h.clock.advance(20);
-    expect(st(h, 'a')).toBe('success');
-    say(h, 'b', '5'); // 2 차례에 5
-    expect(st(h, 'b')).toBe('out');
-    say(h, 'c', '2');
-    h.clock.advance(20);
-    // 미제출 d 한 명 → 탈락, 라운드 종료
+    expect(view(h).phase).toBe('round_result');
     expect(st(h, 'c')).toBe('success');
-    expect(st(h, 'd')).toBe('out');
+  });
+
+  it('정확히 0.001초 차이는 동시로 본다', () => {
+    const h = live();
+    say(h, 'a', '1');
+    say(h, 'b', '1', 1);
+    h.clock.advance(5);
+    expect(st(h, 'a')).toBe('out');
+    expect(st(h, 'b')).toBe('out');
+  });
+
+  it('같은 숫자를 늦게 친 사람만 탈락하고 라운드 종료 (탈락자 1명)', () => {
+    const h = live();
+    say(h, 'a', '1');
+    say(h, 'b', '1', 2); // 0.002초 늦음
+    h.clock.advance(5);
+    expect(st(h, 'a')).toBe('success');
+    expect(st(h, 'b')).toBe('out');
+    expect(view(h).phase).toBe('round_result');
+    expect(view(h).players.filter((p) => p.status === 'out')).toHaveLength(1);
+  });
+
+  it('순서 틀린 숫자는 그 사람만 탈락, 라운드 종료', () => {
+    const h = live();
+    say(h, 'b', '5');
+    expect(st(h, 'b')).toBe('out');
     expect(view(h).phase).toBe('round_result');
   });
 
-  it('창이 열린 동안 온 다른 숫자는 창이 닫힌 뒤 처리한다 (N-1)', () => {
+  it('아무도 안 걸리면 마지막까지 못 친 1명이 탈락', () => {
     const h = live();
     say(h, 'a', '1');
-    say(h, 'b', '2', 3); // 1이 확정되기 전 → 대기 후 처리 → 2 성공
+    say(h, 'b', '2', 20);
+    say(h, 'c', '3', 20);
     h.clock.advance(20);
+    expect(st(h, 'd')).toBe('out');
+    expect(view(h).players.filter((p) => p.status === 'out').map((p) => p.id)).toEqual(['d']);
+  });
+
+  it('창이 열린 동안 온 다음 숫자는 창이 닫힌 뒤 처리한다 (N-1)', () => {
+    const h = live();
+    say(h, 'a', '1');
+    say(h, 'b', '2', 0.5);
+    h.clock.advance(10);
     expect(st(h, 'a')).toBe('success');
     expect(st(h, 'b')).toBe('success');
+    expect(view(h).phase).toBe('live');
   });
 
   it('창 안의 같은 숫자는 사이에 다른 숫자가 끼어도 동시로 묶는다 (리뷰 #1)', () => {
     const h = live();
     say(h, 'a', '1');
-    say(h, 'b', '2', 3);
-    say(h, 'c', '1', 2); // 첫 1로부터 5ms
-    h.clock.advance(30);
+    say(h, 'b', '2', 0.3);
+    say(h, 'c', '1', 0.3);
+    h.clock.advance(10);
     expect(st(h, 'a')).toBe('out');
     expect(st(h, 'c')).toBe('out');
     expect(view(h).claims[0]).toMatchObject({ number: 1, collision: true });
-    expect(st(h, 'b')).toBe('success'); // 1이 소비된 뒤 2로 처리
   });
 
   it('무응답 마감 직전에 접수된 숫자는 먼저 판정하고 탈락시키지 않는다 (리뷰 #2)', () => {
     const h = live(); // live 시작 = 3000, 무응답 마감 = 13000
     h.clock.advance(9995);
-    say(h, 'a', '1'); // 12995
-    say(h, 'b', '2', 3); // 12998
+    say(h, 'a', '1');
+    say(h, 'b', '2', 3);
     h.clock.advance(30);
     expect(st(h, 'a')).toBe('success');
     expect(st(h, 'b')).toBe('success');
-    expect(view(h).players.find((p) => p.id === 'b')!.outCount).toBe(0);
     expect(view(h).phase).toBe('live');
   });
 
   it('판정 창 타이머가 일찍 울려도 창은 결국 닫힌다 (실서버 타이머 오차)', () => {
     const h = live();
-    // 접수 시각이 시계보다 살짝 뒤인 경우를 흉내: 타이머가 창 마감 직전에 울림
     h.inst.onChat!('a', '1', h.clock.now() + 0.9);
     h.clock.advance(30);
     expect(st(h, 'a')).toBe('success');
@@ -155,41 +177,39 @@ describe('눈치게임', () => {
   it('이미 성공한 사람의 추가 숫자는 무효', () => {
     const h = live();
     say(h, 'a', '1');
-    h.clock.advance(20);
+    h.clock.advance(10);
     say(h, 'a', '2');
-    h.clock.advance(20);
+    h.clock.advance(10);
     expect(st(h, 'a')).toBe('success');
     expect(view(h).expected).toBe(2);
   });
 
-  it('게임 종료 시 탈락 횟수가 적은 순, 최다 탈락자는 눈치 없는 사람', () => {
-    const h = live();
-    say(h, 'a', '1');
-    h.clock.advance(20);
-    say(h, 'b', '2');
-    h.clock.advance(20);
-    say(h, 'c', '3');
-    h.clock.advance(20);
+  it('3라운드 뒤 탈락 횟수가 적은 순, 최다 탈락자는 눈치 없는 사람', () => {
+    const h = live(3);
+    for (let r = 0; r < 3; r++) {
+      if (r > 0) h.clock.advance(NUNCHI_TIMING.roundResultMs + NUNCHI_TIMING.countdownMs);
+      say(h, 'a', '1');
+      say(h, 'b', '2', 20);
+      say(h, 'c', '3', 20);
+      h.clock.advance(20);
+    }
     h.clock.advance(NUNCHI_TIMING.roundResultMs + 10);
     expect(h.outcome).not.toBeNull();
     expect(h.outcome!.ranking).toEqual([['a', 'b', 'c'], ['d']]);
     expect(h.outcome!.headlines[0]).toContain('d');
-  });
-
-  it('0.3초 실험 설정이면 300ms 안의 같은 숫자도 동시', () => {
-    const h = harness(nunchi, ['a', 'b', 'c'], { rounds: 1, simulWindowMs: '300' });
-    h.inst.start();
-    h.clock.advance(NUNCHI_TIMING.countdownMs);
-    h.inst.onChat!('a', '1', h.clock.now());
-    h.clock.advance(250);
-    h.inst.onChat!('b', '1', h.clock.now());
-    h.clock.advance(100);
-    const v = h.inst.view('a') as NunchiView;
-    expect(v.claims[0]?.collision).toBe(true);
+    expect(h.outcome!.gameScores!.d).toBe(3);
   });
 });
 
 describe('포브스', () => {
+  it('기본 규칙: 질문 7개, 매운맛 투표 항상, 방 설정 없음', () => {
+    expect(forbes.meta.settings).toEqual([]);
+    const h = harness(forbes, ['a', 'b', 'c'], {});
+    h.inst.start();
+    expect((h.inst.view('a') as ForbesView).phase).toBe('spicy_vote');
+    expect((h.inst.view('a') as ForbesView).rounds).toBe(7);
+  });
+
   it('매운맛은 전원 찬성일 때만, 무응답은 반대로 센다 (H-1)', () => {
     const h = harness(forbes, ['a', 'b', 'c'], { rounds: 2 });
     h.inst.start();

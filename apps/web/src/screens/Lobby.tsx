@@ -16,15 +16,16 @@ export function Lobby({ room }: { room: RoomView }) {
   const [editing, setEditing] = useState<Profile | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const copyLink = async () => {
-    const url = `${location.origin}/?room=${room.code}`;
+  const copy = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(text);
       toast(T.lobby.copied);
     } catch {
-      toast(url);
+      toast(text);
     }
   };
+  const copyLink = () => copy(`${location.origin}/?room=${room.code}`);
+  const copyCode = () => copy(room.code);
 
   const onStart = async () => {
     setBusy(true);
@@ -51,6 +52,9 @@ export function Lobby({ room }: { room: RoomView }) {
           </div>
         </div>
         <div className="row">
+          <button className="btn btn-sm" onClick={copyCode} data-testid="copy-code">
+            📋 {T.lobby.copyCode}
+          </button>
           <button className="btn btn-sm" onClick={copyLink}>
             🔗 {T.lobby.copyLink}
           </button>

@@ -34,7 +34,7 @@ export function NunchiView({ view, receivedAt, players, meId }: GameViewProps<Vi
         <span className="badge">
           라운드 {view.round} / {view.rounds}
         </span>
-        <span className="badge">동시 기준 {(view.windowMs / 1000).toFixed(view.windowMs < 100 ? 2 : 1)}초</span>
+        <span className="badge">동시 기준 {(view.windowMs / 1000).toFixed(3)}초</span>
       </div>
 
       <div className={s.next}>

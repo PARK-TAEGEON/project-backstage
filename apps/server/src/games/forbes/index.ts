@@ -21,11 +21,11 @@ export const FORBES_META: GameMeta = {
   minPlayers: 3,
   recommendedPlayers: [4, 5, 6, 7, 8],
   maxPlayers: 8,
-  settings: [
-    { key: 'rounds', label: '질문 수', type: 'int', default: 7, min: 1, max: 12 },
-    { key: 'spicyVote', label: '시작할 때 매운맛 투표', type: 'bool', default: true },
-  ],
+  settings: [],
 };
+
+/** 고정 규칙 (DEC-15). ctx.settings로 덮어쓰는 것은 테스트 코드에서만 쓴다. */
+export const FORBES_RULES = { rounds: 7, spicyVote: true };
 
 export const FORBES_TIMING = { spicyVoteMs: 10_000, voteMs: 10_000, revealMs: 5000 };
 
@@ -83,7 +83,7 @@ class ForbesGame implements GameInstance {
   private finished = false;
 
   constructor(private ctx: GameContext) {
-    this.rounds = Number(ctx.settings.rounds ?? 7);
+    this.rounds = Number(ctx.settings.rounds ?? FORBES_RULES.rounds);
     for (const p of ctx.players) {
       this.scores.set(p.id, 0);
       this.titles.set(p.id, []);

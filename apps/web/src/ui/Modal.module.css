@@ -1,0 +1,43 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: color-mix(in srgb, var(--c-bg-deep) 75%, transparent);
+  backdrop-filter: blur(4px);
+}
+.box {
+  width: min(520px, 100%);
+  max-height: min(86vh, 760px);
+  display: flex;
+  flex-direction: column;
+  background: var(--c-surface);
+  border: 2px solid var(--c-marquee);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 6px var(--c-bg-deep), 0 20px 60px rgba(0, 0, 0, 0.5);
+  outline: none;
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-4) var(--sp-2);
+}
+.head h2 {
+  font-size: var(--fs-xl);
+  color: var(--c-marquee);
+}
+.body {
+  padding: var(--sp-2) var(--sp-4) var(--sp-4);
+  overflow-y: auto;
+}
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--c-line);
+}

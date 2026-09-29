@@ -38,7 +38,8 @@ describe('방 규칙 유틸', () => {
     expect(s.maxPlayers).toBe(5);
     expect(s.gameRounds).toBe(10);
     expect(s.enabledGameIds).toEqual(['nunchi']);
-    expect(s.gameOptions.nunchi!.rounds).toBe(5);
+    // 게임 내부 규칙은 방에서 바꿀 수 없다 (DEC-15)
+    expect(s.gameOptions.nunchi).toEqual({});
   });
 });
 
@@ -103,50 +104,71 @@ describe('방 · 매치 흐름', () => {
     const h = t.add('A');
     const b = t.add('B');
     const c = t.add('C');
-    t.room.updateSettings(h, {
-      gameRounds: 2,
-      order: 'listed',
-      enabledGameIds: ['nunchi', 'forbes'],
-      gameOptions: { nunchi: { rounds: 1 }, forbes: { rounds: 1, spicyVote: false } },
-    });
-    t.room.setReady(b, true);
-    t.room.setReady(c, true);
+    const d = t.add('D');
+    t.room.updateSettings(h, { gameRounds: 2, order: 'listed', enabledGameIds: ['nunchi', 'forbes'] });
+    for (const id of [b, c, d]) t.room.setReady(id, true);
     expect(t.room.start(h)).toBeNull();
     expect(t.states.get(h)!.phase).toBe('intro');
     expect(t.states.get(h)!.currentGame?.gameId).toBe('nunchi');
 
-    // 게임 1: 눈치게임 — A 1, B 2 → C 탈락
+    // 게임 1: 눈치게임 3라운드 — 매 라운드 A 1, B 2, C 3 → D 탈락
     t.clock.advance(ROOM_TIMING.introMs);
     expect(t.states.get(h)!.phase).toBe('playing');
-    t.clock.advance(NUNCHI_TIMING.countdownMs);
-    t.room.chat(h, '1', t.clock.now());
-    t.clock.advance(20);
-    t.room.chat(b, '2', t.clock.now());
-    t.clock.advance(20);
-    t.clock.advance(NUNCHI_TIMING.roundResultMs);
+    for (let r = 0; r < 3; r++) {
+      t.clock.advance(NUNCHI_TIMING.countdownMs);
+      t.room.chat(h, '1', t.clock.now());
+      t.clock.advance(20);
+      t.room.chat(b, '2', t.clock.now());
+      t.clock.advance(20);
+      t.room.chat(c, '3', t.clock.now());
+      t.clock.advance(20);
+      t.clock.advance(NUNCHI_TIMING.roundResultMs);
+    }
     let s = t.states.get(h)!;
     expect(s.phase).toBe('game_result');
-    expect(s.match!.lastResult!.pointsGained).toEqual({ [h]: 3, [b]: 3, [c]: 1 });
+    expect(s.match!.lastResult!.pointsGained).toEqual({ [h]: 4, [b]: 4, [c]: 4, [d]: 1 });
 
-    // 게임 2: 포브스 — 전원 기권 → 당선자 없음 → 전원 공동 1위
+    // 게임 2: 포브스 7문항 — 전원 기권 → 당선자 없음 → 전원 공동 1위
     t.clock.advance(ROOM_TIMING.gameResultMs);
     t.clock.advance(ROOM_TIMING.introMs);
     expect(t.states.get(h)!.currentGame?.gameId).toBe('forbes');
-    t.clock.advance(10_000 + 5000 + 100);
+    t.clock.advance(10_000 + 7 * (10_000 + 5000) + 100);
     t.clock.advance(ROOM_TIMING.gameResultMs);
     s = t.states.get(h)!;
     expect(s.phase).toBe('final');
-    expect(s.match!.scores).toEqual({ [h]: 6, [b]: 6, [c]: 4 });
-    expect(s.match!.finalRanking).toEqual([[h, b], [c]]);
+    expect(s.match!.scores).toEqual({ [h]: 8, [b]: 8, [c]: 8, [d]: 5 });
+    expect(s.match!.finalRanking).toEqual([[h, b, c], [d]]);
 
     const stats = computeStats(t.sink.all(), null, GAME_METAS.map((m) => m.id));
     expect(stats.totals.matchesCompleted).toBe(1);
-    expect(stats.matchesByPlayerCount).toEqual([{ key: '3', count: 1 }]);
+    expect(stats.matchesByPlayerCount).toEqual([{ key: '4', count: 1 }]);
     expect(stats.games.find((g) => g.gameId === 'nunchi')!.completed).toBe(1);
 
     t.room.playAgain(h);
     expect(t.states.get(h)!.phase).toBe('lobby');
     expect(computeStats(t.sink.all()).totals.replayRate).toBe(1);
+  });
+
+  it('3명이면 눈치게임(4명부터)은 목록에서 빠진다', () => {
+    const t = setup();
+    const h = t.add('A');
+    const b = t.add('B');
+    const c = t.add('C');
+    t.room.updateSettings(h, { gameRounds: 2, order: 'listed', enabledGameIds: ['nunchi', 'forbes'] });
+    t.room.setReady(b, true);
+    t.room.setReady(c, true);
+    t.room.start(h);
+    expect(t.states.get(h)!.match!.playlist.map((p) => p.gameId)).toEqual(['forbes', 'forbes']);
+    t.room.updateSettings(h, {});
+  });
+
+  it('3명이서 눈치게임만 켜 두면 시작할 수 없다', () => {
+    const t = setup();
+    const h = t.add('A');
+    t.add('B');
+    t.add('C');
+    t.room.updateSettings(h, { enabledGameIds: ['nunchi'] });
+    expect(t.room.startBlockers().some((b) => b.includes('할 수 있는 게임'))).toBe(true);
   });
 
   it('연결이 끊기면 유예 시간 뒤 이탈 확정, 그 전에 돌아오면 유지', () => {
@@ -168,7 +190,7 @@ describe('방 · 매치 흐름', () => {
     const b = t.add('B');
     const c = t.add('C');
     const d = t.add('D');
-    t.room.updateSettings(h, { gameRounds: 1, enabledGameIds: ['nunchi'], gameOptions: { nunchi: { rounds: 1 } } });
+    t.room.updateSettings(h, { gameRounds: 1, enabledGameIds: ['nunchi'] });
     for (const id of [b, c, d]) t.room.setReady(id, true);
     t.room.start(h);
     t.clock.advance(ROOM_TIMING.introMs + NUNCHI_TIMING.countdownMs);
@@ -194,7 +216,7 @@ describe('방 · 매치 흐름', () => {
     const h = t.add('A');
     const b = t.add('B');
     const c = t.add('C');
-    t.room.updateSettings(h, { gameRounds: 2, order: 'listed', enabledGameIds: ['forbes'], gameOptions: { forbes: { rounds: 1, spicyVote: false } } });
+    t.room.updateSettings(h, { gameRounds: 2, order: 'listed', enabledGameIds: ['forbes'] });
     t.room.setReady(b, true);
     t.room.setReady(c, true);
     t.room.start(h);

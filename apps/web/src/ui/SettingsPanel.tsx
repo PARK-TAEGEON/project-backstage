@@ -1,16 +1,13 @@
 /**
  * 방 규칙 설정 — 방 만들기 화면과 대기실에서 같이 쓴다.
- * 게임별 설정 칸은 게임 meta.settings 정의를 보고 자동으로 그린다 (새 게임을 넣으면 설정 UI도 따라옴).
+ * 게임 내부 규칙(라운드 수 등)은 방에서 바꿀 수 없다 (DEC-15). Roblox 후보 같은 내부 참고 정보는 관리자 화면에만 둔다.
  */
 import {
   GAME_ROUNDS_MAX,
   GAME_ROUNDS_MIN,
   ROOM_MAX_PLAYERS,
   ROOM_MIN_PLAYERS,
-  isRobloxCandidate,
   type GameMeta,
-  type GameSettingDef,
-  type GameSettingValue,
   type RoomSettings,
 } from '@backstage/shared';
 import { T } from '../content/ko';
@@ -32,34 +29,6 @@ function Stepper({ value, min, max, onChange, disabled, label }: { value: number
   );
 }
 
-function SettingInput({ def, value, onChange, disabled }: { def: GameSettingDef; value: GameSettingValue | undefined; onChange: (v: GameSettingValue) => void; disabled: boolean }) {
-  if (def.type === 'int') {
-    return <Stepper label={def.label} value={Number(value ?? def.default)} min={def.min} max={def.max} onChange={onChange} disabled={disabled} />;
-  }
-  if (def.type === 'bool') {
-    const v = Boolean(value ?? def.default);
-    return (
-      <div className="row">
-        <button type="button" className="chip" aria-pressed={v} disabled={disabled} onClick={() => onChange(true)}>
-          켜기
-        </button>
-        <button type="button" className="chip" aria-pressed={!v} disabled={disabled} onClick={() => onChange(false)}>
-          끄기
-        </button>
-      </div>
-    );
-  }
-  return (
-    <div className="row">
-      {def.options.map((o) => (
-        <button key={o.value} type="button" className="chip" aria-pressed={(value ?? def.default) === o.value} disabled={disabled} onClick={() => onChange(o.value)}>
-          {o.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 export function GameBadges({ meta }: { meta: GameMeta }) {
   return (
     <span className="row">
@@ -68,7 +37,6 @@ export function GameBadges({ meta }: { meta: GameMeta }) {
         {meta.minPlayers}~{meta.maxPlayers}
         {T.settings.players}
       </span>
-      {isRobloxCandidate(meta) && <span className="badge">Roblox 후보</span>}
     </span>
   );
 }
@@ -92,8 +60,6 @@ export function SettingsPanel({
     const next = on ? settings.enabledGameIds.filter((x) => x !== id) : [...settings.enabledGameIds, id];
     if (next.length) onChange({ enabledGameIds: next });
   };
-  const setOpt = (gameId: string, key: string, v: GameSettingValue) =>
-    onChange({ gameOptions: { ...settings.gameOptions, [gameId]: { ...settings.gameOptions[gameId], [key]: v } } });
 
   return (
     <div className={s.panel}>
@@ -145,16 +111,6 @@ export function SettingsPanel({
                 <p className="faint" style={{ margin: 0, fontSize: 'var(--fs-sm)' }}>
                   {g.tagline}
                 </p>
-                {on && g.settings.length > 0 && (
-                  <div className={s.opts}>
-                    {g.settings.map((def) => (
-                      <div key={def.key} className={s.opt}>
-                        <span className="label">{def.label}</span>
-                        <SettingInput def={def} value={settings.gameOptions[g.id]?.[def.key]} disabled={dis} onChange={(v) => setOpt(g.id, def.key, v)} />
-                      </div>
-                    ))}
-                  </div>
-                )}
               </li>
             );
           })}
