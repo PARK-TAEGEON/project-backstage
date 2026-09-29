@@ -38,6 +38,7 @@ npm run check        # 타입 검사 + 단위 테스트
 npm run build && npm start   # 배포 모드: 서버가 빌드된 웹까지 제공 → http://localhost:3001
 ```
 
+- **Windows에서 가장 쉬운 방법:** 저장소 폴더의 `start-backstage.bat`를 더블클릭 → 처음 한 번 패키지 설치 → 빌드 → 서버 실행 → 브라우저에서 http://localhost:3001 이 열린다. 창을 닫으면 서버가 꺼진다. Node.js 22 이상 필요.
 - 관리자 관찰 화면: `/admin`. `ADMIN_TOKEN` 환경 변수를 설정하면 토큰을 입력해야 볼 수 있다 (배포 시 필수).
 - 관찰 데이터는 `data/events.jsonl`에 쌓인다 (`DATA_DIR`로 변경).
 - 스모크 테스트: 서버를 `PORT=3999`로 띄운 뒤 `BASE_URL=http://localhost:3999 npm run e2e`. 캡처는 `e2e-artifacts/`.
