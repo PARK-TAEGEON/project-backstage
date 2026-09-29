@@ -273,3 +273,19 @@ describe('포브스', () => {
     expect(h.outcome).not.toBeNull();
   });
 });
+
+describe('포브스 질문 덱 (2026-09-30 확장)', () => {
+  it('질문 150개 이상, id·제목 고유, “…것 같은 사람” 형식, 매운맛은 나쁜 질문만', async () => {
+    const { FORBES_QUESTIONS } = await import('../src/games/forbes/questions.js');
+    expect(FORBES_QUESTIONS.length).toBeGreaterThanOrEqual(150);
+    expect(new Set(FORBES_QUESTIONS.map((q) => q.id)).size).toBe(FORBES_QUESTIONS.length);
+    expect(new Set(FORBES_QUESTIONS.map((q) => q.title)).size).toBe(FORBES_QUESTIONS.length);
+    for (const q of FORBES_QUESTIONS) {
+      expect(q.title.endsWith('것 같은 사람')).toBe(true);
+      if (q.spicy) expect(q.kind).toBe('bad');
+    }
+    // 순한맛만으로도 7문항(나쁜 4·좋은 3)을 여러 판 채울 수 있다
+    expect(FORBES_QUESTIONS.filter((q) => q.kind === 'bad' && !q.spicy).length).toBeGreaterThanOrEqual(40);
+    expect(FORBES_QUESTIONS.filter((q) => q.kind === 'good').length).toBeGreaterThanOrEqual(40);
+  });
+});

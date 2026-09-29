@@ -61,10 +61,12 @@ describe('단어 풀·공통 부품', () => {
       expect(pool.every(isValidAssignableWord)).toBe(true);
       expect(new Set(pool).size).toBe(pool.length);
     }
-    expect(POOL_1.length).toBeGreaterThanOrEqual(80);
-    expect(POOL_2.length).toBeGreaterThanOrEqual(100);
-    expect(POOL_3.length).toBeGreaterThanOrEqual(60);
-    expect(HOST_LINES.length).toBeGreaterThanOrEqual(30);
+    expect(POOL_1.length).toBeGreaterThanOrEqual(200);
+    expect(POOL_2.length).toBeGreaterThanOrEqual(340);
+    expect(POOL_3.length).toBeGreaterThanOrEqual(250);
+    expect(HOST_LINES.length).toBeGreaterThanOrEqual(120);
+    const all = [...POOL_1, ...POOL_2, ...POOL_3];
+    expect(new Set(all).size).toBe(all.length); // 풀 사이 중복 없음
   });
   it('배정: 정확히 N개, 중복 없음, 풀 3은 0~1개, 이미 쓴 단어는 피한다', () => {
     const rand = lcg(3);
