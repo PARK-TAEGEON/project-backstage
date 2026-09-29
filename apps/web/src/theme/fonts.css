@@ -1,0 +1,18 @@
+/*
+ * 오락실 도트 폰트 — Galmuri11 (SIL OFL 1.1, assets/fonts/galmuri/OFL.md)
+ * 저장소에 파일로 포함해 외부 CDN 없이 로드한다.
+ */
+@font-face {
+  font-family: 'Galmuri11';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/galmuri/Galmuri11.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Galmuri11';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/galmuri/Galmuri11-Bold.woff2') format('woff2');
+}

@@ -54,6 +54,9 @@ export function Home() {
         </div>
         <h1 className={`${s.brand} display`}>{BRAND.name}</h1>
         <p className="dim">{BRAND.tagline}</p>
+        <p className={`pixel blink ${s.press}`} aria-hidden>
+          ▶ PRESS START
+        </p>
         {resuming && <p className="faint">{T.home.reconnecting}</p>}
         {!connected && <p className="faint">서버에 연결하는 중…</p>}
       </header>

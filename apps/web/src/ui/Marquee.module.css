@@ -37,9 +37,10 @@
   gap: var(--sp-3);
 }
 .kicker {
-  font-family: var(--font-display);
-  letter-spacing: 0.3em;
-  font-size: var(--fs-sm);
+  font-family: var(--font-pixel);
+  -webkit-font-smoothing: none;
+  letter-spacing: 0.2em;
+  font-size: var(--fs-pixel);
   color: var(--c-marquee);
 }
 .title {
@@ -90,10 +91,12 @@
   background: var(--c-bad);
 }
 .timerText {
+  font-family: var(--font-pixel);
+  -webkit-font-smoothing: none;
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-pixel);
   font-weight: 700;
 }

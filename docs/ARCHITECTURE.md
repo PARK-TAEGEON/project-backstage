@@ -78,7 +78,7 @@ npm run build && npm start   # 배포 모드: 서버가 빌드된 웹까지 제�
 | 아바타 | `AvatarConfig`(색·표정·머리 장식) + `Avatar` 컴포넌트 하나로 모든 화면에 그림 | 파츠 추가는 `avatar.ts` 옵션 배열에 항목만 추가. 움직이는 아바타 게임은 `inputs: ['avatar']`로 표시하고 게임 화면에서 캔버스/3D를 쓰면 된다 |
 | 채팅 외 입력 | `inputs: chat / vote / text / avatar`, 게임 전용 입력은 `game:action` | 새 입력 방식도 `onAction`으로 받는다 |
 | 관찰 데이터 | 이벤트 JSONL + `/admin` 통계 (인원별 매치 수, 게임별 완주율·평균 시간·인원 분포, 재플레이율, 이탈 단계) | 저장소를 DB로 바꿀 때는 `EventSink` 구현만 교체 |
-| UI/UX 수정 | 토큰(`tokens.css`), 문구(`content/ko.ts`), 브랜드(`config/brand.ts`)를 한곳에서 관리. 화면별 CSS Module | 테마를 바꾸려면 토큰 값만, 문구는 ko.ts만 수정 |
+| UI/UX 수정 | 폰트(`fonts.css` + `--font-*` 토큰, 08-UI-NOTES), 토큰(`tokens.css`), 문구(`content/ko.ts`), 브랜드(`config/brand.ts`)를 한곳에서 관리. 화면별 CSS Module | 테마를 바꾸려면 토큰 값만, 문구는 ko.ts만 수정 |
 
 ## 개인정보
 

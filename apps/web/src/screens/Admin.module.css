@@ -9,7 +9,10 @@
   gap: 4px;
 }
 .kpi strong {
-  font-size: var(--fs-2xl);
+  font-family: var(--font-pixel);
+  -webkit-font-smoothing: none;
+  font-weight: 400;
+  font-size: var(--fs-pixel-lg);
   color: var(--c-marquee);
   line-height: 1.1;
 }

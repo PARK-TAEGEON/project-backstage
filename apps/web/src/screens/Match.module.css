@@ -17,7 +17,9 @@
   flex-wrap: wrap;
 }
 .progress li {
-  font-size: var(--fs-xs);
+  font-family: var(--font-pixel);
+  -webkit-font-smoothing: none;
+  font-size: var(--fs-pixel);
   padding: 2px 8px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--c-line);
@@ -73,6 +75,17 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.score strong,
+.rank strong {
+  font-family: var(--font-pixel);
+  -webkit-font-smoothing: none;
+  font-size: var(--fs-pixel-lg);
+  font-weight: 400;
+  color: var(--c-marquee);
+}
+.score strong {
+  font-size: var(--fs-pixel);
 }
 .score li,
 .rank li {

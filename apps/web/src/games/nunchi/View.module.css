@@ -67,7 +67,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-2);
-  font-size: var(--fs-sm);
+  font-family: var(--font-pixel);
+  -webkit-font-smoothing: none;
+  font-size: var(--fs-pixel);
 }
 .claims li {
   display: flex;

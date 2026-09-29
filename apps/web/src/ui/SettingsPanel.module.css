@@ -16,8 +16,9 @@
 .stepValue {
   min-width: 36px;
   text-align: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-xl);
+  font-family: var(--font-pixel);
+  -webkit-font-smoothing: none;
+  font-size: var(--fs-pixel-lg);
   color: var(--c-marquee);
 }
 .games {

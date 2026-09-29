@@ -27,6 +27,10 @@
   --font-display: 'Black Han Sans', 'Noto Sans KR', system-ui, sans-serif;
   --font-body: 'Noto Sans KR', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  /* 오락실 도트 — 작은 글씨·숫자·배지용 (fonts.css). 12px 배수에서 가장 선명하다 */
+  --font-pixel: 'Galmuri11', var(--font-mono);
+  --fs-pixel: 12px;
+  --fs-pixel-lg: 24px;
 
   /* 크기 */
   --fs-xs: 12px;
