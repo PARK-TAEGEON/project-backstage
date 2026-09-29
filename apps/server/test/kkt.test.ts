@@ -82,9 +82,12 @@ describe('쿵쿵따 한글 도구', () => {
 });
 
 describe('쿵쿵따 사전 파일', () => {
-  it('표준국어대사전 세 글자 단어를 읽는다', () => {
+  it('표준국어대사전 + 우리말샘 세 글자 단어를 읽는다', () => {
     const d = loadDictionaryFile();
-    expect(d.size).toBeGreaterThan(90_000);
+    expect(d.size).toBeGreaterThan(190_000);
+    // 우리말샘 보강 (DEC-19): 표준국어대사전에 없던 흔한 말
+    for (const w of ['헬스장', '캠핑장', '치킨집', '피시방', '택시비', '아이돌']) expect(d.has(w)).toBe(true);
+    expect(d.definition('간식템')).toContain('우리말샘'); // 우리말샘에만 있는 말은 출처 표시
     for (const w of ['다람쥐', '선풍기', '노래방', '컴퓨터', '역사가']) expect(d.has(w)).toBe(true);
     expect(d.has('사과쥽')).toBe(false);
     expect(d.definition('선풍기')).toContain('바람');

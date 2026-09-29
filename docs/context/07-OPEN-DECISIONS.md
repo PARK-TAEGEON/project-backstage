@@ -207,3 +207,11 @@
 - 대안과 이유: AI 공급자를 정하고 연결(OPEN-06) — 비용·키·지연 부담, 지금은 풀 확장으로 충분. 나중에 다양성이 필요하면 스펙의 AI 호출 지점에 붙인다.
 - 영향 문서 / 게임 버전: catalog/games/WORD.md·BAN.md(0.4 구현 메모), catalog/INDEX, IMPLEMENTATION-BACKLOG, 00-STATUS, ARCHITECTURE. 코드: apps/server/src/games/{word,ban,wordcore}, 방 채팅 `audience`(그룹 채팅), `GameContext.updatePlayer`.
 - 재검수 조건: 같은 단어가 자주 반복된다는 반응, 또는 AI 단어 공급을 붙일 때.
+
+- DEC-19 / 2026-09-30 / accepted
+- 질문 및 결정: 쿵쿵따 사전에 **우리말샘을 추가**하고 두 사전 모두 최신 빌드로 바꾼다 — 표준국어대사전(2026-06-05) + 우리말샘(2026-06-02), 한글 세 글자 197,543개. KKT 스펙 K-1의 “표준국어대사전 1종”을 대체한다. 판정 규칙은 그대로.
+- 근거: 사용자 결정 (2026-09-30 대화: “없는 단어가 좀 많다” → 우리말샘 추가 선택). 확인 결과 2019년 표준국어대사전에는 헬스장·캠핑장·치킨집·택시비·아이돌 같은 흔한 합성어·외래어가 빠져 있었다.
+- 대안과 이유: 직접 만든 보충 목록 — 관리 부담, 기준이 자의적. 표준국어대사전만 최신화 — 흔한 합성어는 여전히 대부분 없음.
+- 영향 문서 / 게임 버전: catalog/games/KKT.md(구현 메모·K-1), apps/server/dict/README.md, INDEX, IMPLEMENTATION-BACKLOG. 코드: apps/server/dict/kkt-3syl.tsv.gz, scripts/build-kkt-dict.py, dictionary.ts.
+- 남는 한계: 상표·서비스 이름(유튜브·인스타), “~님” 꼴, 비표준 표기(피씨방)는 여전히 없다.
+- 재검수 조건: 우리말샘의 낯선 지명·인명·방언이 너무 쉽게 통과해 재미를 해친다는 반응이 반복될 때 (우리말샘에서 지명·인명 범주를 빼는 선택지).

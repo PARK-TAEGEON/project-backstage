@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 
 // 쿵쿵따용: 서버와 같은 사전에서 정답 단어를 고른다
-const DICT = gunzipSync(readFileSync('apps/server/dict/stdict-3syl.tsv.gz'))
+const DICT = gunzipSync(readFileSync('apps/server/dict/kkt-3syl.tsv.gz'))
   .toString('utf8')
   .split('\n')
   .filter(Boolean)

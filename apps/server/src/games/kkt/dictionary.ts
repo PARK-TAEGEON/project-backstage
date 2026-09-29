@@ -1,13 +1,14 @@
 /**
  * 쿵쿵따 사전 — 서버에 둔 세 글자 단어 목록 (apps/server/dict/README.md).
- * 게임 중에는 외부 API를 부르지 않는다. 처음 쓸 때 한 번 읽어 메모리에 둔다 (약 10만 단어).
+ * 게임 중에는 외부 API를 부르지 않는다. 처음 쓸 때 한 번 읽어 메모리에 둔다 (약 20만 단어).
+ * 표준국어대사전 + 우리말샘 (DEC-19). 우리말샘에만 있는 단어는 뜻 앞에 〔우리말샘〕을 붙인다.
  */
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
-export const DICT_VERSION = 'stdict-2019-06-25';
-export const DICT_CREDIT = '사전: 국립국어원 표준국어대사전 · CC BY-SA 2.0 KR';
+export const DICT_VERSION = 'stdict-2026-06-05+opendict-2026-06-02';
+export const DICT_CREDIT = '사전: 국립국어원 표준국어대사전·우리말샘 · CC BY-SA 2.0 KR';
 
 export interface KktDictionary {
   readonly version: string;
@@ -45,15 +46,17 @@ export function buildDictionary(entries: Iterable<[string, string]>, version = D
   };
 }
 
-const DEFAULT_PATH = fileURLToPath(new URL('../../../dict/stdict-3syl.tsv.gz', import.meta.url));
+const DEFAULT_PATH = fileURLToPath(new URL('../../../dict/kkt-3syl.tsv.gz', import.meta.url));
 
 export function loadDictionaryFile(path = DEFAULT_PATH): KktDictionary {
   const text = gunzipSync(readFileSync(path)).toString('utf8');
   const entries: [string, string][] = [];
   for (const line of text.split('\n')) {
     if (!line) continue;
-    const tab = line.indexOf('\t');
-    entries.push(tab < 0 ? [line, ''] : [line.slice(0, tab), line.slice(tab + 1)]);
+    // 단어<TAB>출처(s|u)<TAB>뜻
+    const [w, src, def = ''] = line.split('\t');
+    if (!w) continue;
+    entries.push([w, src === 'u' ? `〔우리말샘〕 ${def}` : def]);
   }
   return buildDictionary(entries);
 }
